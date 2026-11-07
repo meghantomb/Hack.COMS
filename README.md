@@ -1,4 +1,4 @@
-# Pond Hearts
+# What the Duck?
 
 Minimal browser duck dating sim (DDLC-inspired vertical slice). Four ducks (`jock`, `breadluvr`, `badboy`, `artist`) with left/right PNG slots; Breadluvr route playable; love meters; Lily Pad Hop; friendship / romance endings.
 

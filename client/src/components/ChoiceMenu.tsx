@@ -7,23 +7,32 @@ export function ChoiceMenu({ options }: { options: DialogueOption[] }) {
   const text = useGameStore((s) => s.bundle?.node.text ?? "");
   const ready = typedLength >= text.length;
 
-  if (!ready || options.length === 0) return null;
+  if (options.length === 0) return null;
 
   return (
-    <div className="absolute inset-x-4 bottom-36 z-30 flex max-w-2xl flex-col gap-2 sm:left-1/2 sm:w-full sm:-translate-x-1/2 sm:px-8">
-      {options.map((opt) => (
-        <button
-          key={opt.id}
-          type="button"
-          onClick={() => void selectOption(opt)}
-          className="rounded-xl border border-pond-light/40 bg-pond-deep/90 px-4 py-3 text-left font-story text-base text-pond-foam transition hover:border-pond-sunset hover:bg-pond-mid/90"
+    <div className="min-h-[3.25rem] w-full">
+      {ready && (
+        <div
+          className="grid w-full gap-2"
+          style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
         >
-          <span>{opt.text}</span>
-          {opt.minigameId && (
-            <span className="ml-2 text-xs text-pond-sunset">★ minigame</span>
-          )}
-        </button>
-      ))}
+          {options.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => void selectOption(opt)}
+              className="rounded-xl border border-pond-light/40 bg-pond-deep/90 px-2 py-2 text-center font-story text-sm leading-snug text-pond-foam transition hover:border-pond-sunset hover:bg-pond-mid/90 sm:px-3 sm:text-base"
+            >
+              <span>{opt.text}</span>
+              {opt.minigameId && (
+                <span className="mt-1 block text-[10px] text-pond-sunset sm:text-xs">
+                  ★ minigame
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -13,7 +13,8 @@
  * Backgrounds:
  *   backgrounds/pond.png | island.png | pond_sunset.png
  *
- * Staging: MC on the left uses *_right (faces center); duck on the right uses *_left.
+ * Staging: one duck keeps the bread on the opposite side. Several ducks put the bread
+ * in the center; a duck on the left uses *_right, a duck on the right uses *_left.
  */
 
 export const DUCK_IDS = ["jock", "breadluvr", "badboy", "artist"] as const;

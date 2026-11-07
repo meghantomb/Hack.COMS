@@ -4,9 +4,11 @@ import { Background } from "./components/Background";
 import { CharacterStage } from "./components/CharacterStage";
 import { DialogueBox } from "./components/DialogueBox";
 import { ChoiceMenu } from "./components/ChoiceMenu";
-import { LoveMeters } from "./components/LoveMeters";
+import { StageChrome } from "./components/LoveMeters";
 import { EndingScreen } from "./components/EndingScreen";
 import { MinigameOverlay } from "./minigames/MinigameOverlay";
+import { ducksOnStage } from "./stage/ducksOnStage";
+import { layoutStage } from "./stage/layoutStage";
 
 export default function App() {
   const phase = useGameStore((s) => s.phase);
@@ -46,41 +48,30 @@ export default function App() {
     );
   }
 
+  const showDucks = !bundle.node.isEnding || Boolean(bundle.node.endingType);
+  const layout = layoutStage(ducksOnStage(bundle, showDucks));
+
   return (
-    <div className="relative h-full min-h-[100dvh] overflow-hidden">
+    <div className="relative flex h-full min-h-[100dvh] flex-col overflow-hidden">
       <Background backgroundKey={bundle.node.backgroundKey} />
 
-      <header className="absolute right-4 top-4 z-20 text-right">
-        <h1 className="font-display text-2xl text-pond-foam drop-shadow sm:text-3xl">
-          Pond Hearts
-        </h1>
-        <button
-          type="button"
-          onClick={() => void restart()}
-          className="mt-1 text-xs text-pond-light/70 underline hover:text-pond-foam"
-        >
-          Reset save
-        </button>
-      </header>
-
-      <LoveMeters
+      <StageChrome
+        layout={layout}
         meters={bundle.loveMeters}
-        activeCharacterId={bundle.character.id}
+        onRestart={() => void restart()}
       />
 
       {(phase === "dialogue" || phase === "ending") && (
-        <CharacterStage
-          duckName={bundle.character.name}
-          duckSpriteKey={bundle.character.spriteKey}
-          showDuck={!bundle.node.isEnding || Boolean(bundle.node.endingType)}
-        />
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          <CharacterStage layout={layout} showDucks={showDucks} />
+        </div>
       )}
 
       {phase === "dialogue" && (
-        <>
+        <div className="relative z-20 mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 pb-4 sm:px-8 sm:pb-6">
           <DialogueBox speaker={bundle.node.speaker} text={bundle.node.text} />
           <ChoiceMenu options={bundle.options} />
-        </>
+        </div>
       )}
 
       {phase === "ending" && <EndingScreen />}

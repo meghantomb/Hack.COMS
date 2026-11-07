@@ -1,56 +1,92 @@
 import type { LoveMeter } from "@duck-dating/shared";
 import { getFriendlinessLabel } from "@duck-dating/shared";
-import { duckPortraitSrc } from "../assets/manifest";
-import { SpriteImage } from "./SpriteImage";
+import type { StageLayout } from "../stage/layoutStage";
 
-export function LoveMeters({
-  meters,
-  activeCharacterId,
-}: {
-  meters: LoveMeter[];
-  activeCharacterId: string;
-}) {
+function meterFor(
+  duck: { id: string; name: string; spriteKey: string },
+  meters: LoveMeter[],
+): LoveMeter {
   return (
-    <div className="absolute left-3 top-3 z-20 flex w-[min(100%,16rem)] flex-col gap-2 sm:left-4 sm:top-4">
-      <p className="font-display text-xs uppercase tracking-widest text-pond-light/80">
-        Love
-      </p>
-      {meters.map((m) => {
-        const active = m.characterId === activeCharacterId;
-        return (
-          <div
-            key={m.characterId}
-            className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 backdrop-blur-sm ${
-              active
-                ? "border-pond-sunset/60 bg-pond-ink/80"
-                : "border-pond-light/15 bg-pond-ink/55"
-            }`}
-          >
-            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-md bg-pond-deep/80">
-              <SpriteImage
-                src={duckPortraitSrc(m.spriteKey)}
-                alt={m.name}
-                className="h-full w-full object-cover object-top"
-                placeholderClassName="flex h-full w-full items-center justify-center bg-pond-mid/50 text-[9px] text-pond-foam"
-              />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between gap-1">
-                <p className="truncate font-display text-sm text-pond-foam">{m.name}</p>
-                <p className="shrink-0 text-[10px] text-pond-light">
-                  {getFriendlinessLabel(m.friendliness)}
-                </p>
-              </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-pond-deep">
-                <div
-                  className="h-full rounded-full bg-pond-sunset transition-all duration-500"
-                  style={{ width: `${m.friendliness}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      })}
+    meters.find((meter) => meter.characterId === duck.id) ?? {
+      characterId: duck.id,
+      name: duck.name,
+      spriteKey: duck.spriteKey,
+      friendliness: 0,
+    }
+  );
+}
+
+/** Relation bar for one duck, sitting on that duck's side of the screen. */
+function RelationBar({ meter }: { meter: LoveMeter }) {
+  return (
+    <div className="w-full max-w-[14rem] rounded-md border border-pond-light/20 bg-pond-ink/75 px-3 py-2 backdrop-blur-sm">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="truncate font-display text-sm text-pond-foam">{meter.name}</p>
+        <p className="shrink-0 text-[10px] text-pond-light">
+          {getFriendlinessLabel(meter.friendliness)}
+        </p>
+      </div>
+      <div
+        className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/25"
+        role="meter"
+        aria-label={`${meter.name} relation`}
+        aria-valuenow={meter.friendliness}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className="h-full rounded-full bg-pond-sunset transition-all duration-500"
+          style={{ width: `${meter.friendliness}%` }}
+        />
+      </div>
     </div>
+  );
+}
+
+export function StageChrome({
+  layout,
+  meters,
+  onRestart,
+}: {
+  layout: StageLayout;
+  meters: LoveMeter[];
+  onRestart: () => void;
+}) {
+  const left = layout.ducks.filter((duck) => duck.side === "left");
+  const right = layout.ducks.filter((duck) => duck.side === "right");
+
+  const title = (
+    <div>
+      <h1 className="font-display text-xl text-pond-foam drop-shadow sm:text-2xl">
+        What the Duck?
+      </h1>
+      <button
+        type="button"
+        onClick={onRestart}
+        className="mt-0.5 text-xs text-pond-light/70 underline hover:text-pond-foam"
+      >
+        Reset save
+      </button>
+    </div>
+  );
+
+  return (
+    <header className="relative z-20 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3 px-4 pt-4 sm:px-6">
+      <div className="flex flex-col items-start gap-2">
+        {left.length === 0
+          ? title
+          : left.map((duck) => <RelationBar key={duck.id} meter={meterFor(duck, meters)} />)}
+      </div>
+      <div className="px-2 pt-0.5 text-center">
+        {left.length > 0 && right.length > 0 ? title : null}
+      </div>
+      <div className="flex flex-col items-end gap-2">
+        {right.length > 0
+          ? right.map((duck) => <RelationBar key={duck.id} meter={meterFor(duck, meters)} />)
+          : left.length > 0
+            ? title
+            : null}
+      </div>
+    </header>
   );
 }

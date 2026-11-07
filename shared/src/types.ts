@@ -87,14 +87,26 @@ export interface LoveMeter {
   friendliness: number;
 }
 
+/** A duck present in the current scene. Omit `side` and several ducks are split left and right. */
+export interface StagePresence {
+  characterId: string;
+  side?: "left" | "right";
+}
+
 export interface DialogueBundle {
   node: DialogueNode;
   options: DialogueOption[];
   character: Character;
   friendliness: number;
   tier: FriendlinessTier;
-  /** Love bars for all ducks (four slots). */
+  /** Love bars for all ducks (four slots). The stage shows a bar only for ducks in the scene. */
   loveMeters: LoveMeter[];
+  /**
+   * Ducks standing on stage. One duck: the bread stands on the other side.
+   * More than one: the bread stands in the center.
+   * Omit to show only `character` on the right.
+   */
+  onStage?: StagePresence[];
 }
 
 /** The four dateable duck IDs — art files: `{id}_left.png` / `{id}_right.png`. */

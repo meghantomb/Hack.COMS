@@ -35,7 +35,7 @@ export function DialogueBox({
   return (
     <button
       type="button"
-      className="absolute inset-x-4 bottom-4 z-20 w-auto max-w-3xl rounded-2xl border border-pond-light/30 bg-pond-ink/85 p-4 text-left shadow-xl backdrop-blur-sm sm:inset-x-8 sm:bottom-6 sm:left-1/2 sm:w-full sm:-translate-x-1/2 sm:p-5"
+      className="w-full rounded-2xl border border-pond-light/30 bg-pond-ink/85 p-4 text-left shadow-xl backdrop-blur-sm sm:p-5"
       onClick={() => {
         if (!done) {
           skipRef.current = true;
@@ -46,7 +46,7 @@ export function DialogueBox({
       <div className="mb-2 inline-block rounded-md bg-pond-mid px-3 py-0.5 font-display text-sm text-pond-foam">
         {speaker}
       </div>
-      <p className="min-h-[4.5rem] font-story text-lg leading-relaxed text-pond-foam sm:text-xl">
+      <p className="min-h-[3.25rem] font-story text-lg leading-relaxed text-pond-foam sm:text-xl">
         {shown}
         {!done && <span className="caret">▌</span>}
       </p>
