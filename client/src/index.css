@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Nunito", system-ui, sans-serif;
+}
+
+@keyframes type-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.caret {
+  animation: type-caret 1s step-end infinite;
+}
