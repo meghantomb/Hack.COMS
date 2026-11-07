@@ -14,7 +14,7 @@ export const sampleCharacters: Character[] = [
     id: "jock",
     name: "Ryan",
     personality:
-      "Energetic and competitive; always organizing races around the reeds and daring others to keep up.",
+      "Energetic and competitive; always organizing races around the reeds and daring others to keep up. Deep down, he is sensitive and cares deeply about his friends. He tries to keep everyone happy, even if it means sacrificing his own needs. But he tends to keep up that happy go lucky jock persona.",
     spriteKey: "jock",
     description: "Art: ducks/jock_left.png & jock_right.png",
   },
@@ -30,7 +30,7 @@ export const sampleCharacters: Character[] = [
     id: "badboy",
     name: "Xander",
     personality:
-      "Broody loner energy; acts cool by the deep end but notices every glance. He has a reputation for being hard to get to know. He can be quite charming once you break through his defenses.",
+      "Broody loner energy; acts cool by the deep end but notices every glance. He has a reputation for being hard to get to know. He can be quite charming once you break through his defenses, but it takes work to even get through those defenses. He never lets anyone see his true self easily. When things get hard, he gets into alot of fights and has even been arrested a few times.",
     spriteKey: "badboy",
     description: "Art: ducks/badboy_left.png & badboy_right.png",
   },
@@ -38,7 +38,7 @@ export const sampleCharacters: Character[] = [
     id: "artist",
     name: "Jeremy",
     personality:
-      "Quiet observer who sketches from the shadows and notices everything you almost said. A true artist at heart. Writes poetry and paints with equal passion.",
+      "Quiet observer who sketches from the shadows and notices everything you almost said. A true artist at heart. Writes poetry and paints with equal passion. Artist is looking for inspiration in the world around him, and you might be his next muse.",
     spriteKey: "artist",
     description: "Art: ducks/artist_left.png & artist_right.png",
   },
