@@ -12,7 +12,7 @@ import type {
 export const sampleCharacters: Character[] = [
   {
     id: "jock",
-    name: "Jock",
+    name: "Ryan",
     personality:
       "Energetic and competitive; always organizing races around the reeds and daring others to keep up.",
     spriteKey: "jock",
@@ -20,25 +20,25 @@ export const sampleCharacters: Character[] = [
   },
   {
     id: "breadluvr",
-    name: "Breadluvr",
+    name: "Sam",
     personality:
-      "A soft-spoken duck who loves quiet mornings at the pond, poetry about ripples, and sharing snacks.",
+      "A bread obsessed duck who is infatuated with you and always wants to be with and around you. He also wants to eat you and is borderline dangerous and creepy at times.",
     spriteKey: "breadluvr",
     description: "Art: ducks/breadluvr_left.png & breadluvr_right.png",
   },
   {
     id: "badboy",
-    name: "Badboy",
+    name: "Xander",
     personality:
-      "Broody loner energy; acts cool by the deep end but notices every glance.",
+      "Broody loner energy; acts cool by the deep end but notices every glance. He has a reputation for being hard to get to know. He can be quite charming once you break through his defenses.",
     spriteKey: "badboy",
     description: "Art: ducks/badboy_left.png & badboy_right.png",
   },
   {
     id: "artist",
-    name: "Artist",
+    name: "Jeremy",
     personality:
-      "Quiet observer who sketches from the shadows and notices everything you almost said.",
+      "Quiet observer who sketches from the shadows and notices everything you almost said. A true artist at heart. Writes poetry and paints with equal passion.",
     spriteKey: "artist",
     description: "Art: ducks/artist_left.png & artist_right.png",
   },
@@ -67,7 +67,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "breadluvr_hello",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "Oh—hi. I didn't think anyone else came here this early. I'm Breadluvr. Do you... like ponds too?",
     backgroundKey: "pond",
     spriteExpression: "shy",
@@ -77,7 +77,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "small_talk",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "The water looks calm today. Sometimes I write about the way lily pads drift. It sounds silly when I say it out loud.",
     backgroundKey: "pond",
     spriteExpression: "neutral",
@@ -87,7 +87,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "invite_hop",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "There's a path of lily pads to the little island. I never try it alone... Would you hop across with me?",
     backgroundKey: "pond",
     spriteExpression: "hopeful",
@@ -97,7 +97,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "after_hop_win",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "You made it! My heart's still racing. Thank you for going with me. I feel... safer when you're around.",
     backgroundKey: "island",
     spriteExpression: "happy",
@@ -107,7 +107,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "after_decline",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "That's okay. We can just sit here. The ripples are company enough... most days.",
     backgroundKey: "pond",
     spriteExpression: "sad",
@@ -117,7 +117,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "deeper_chat",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "Can I ask something? When you talk to me, do you mean it... or are you just being polite?",
     backgroundKey: "island",
     spriteExpression: "shy",
@@ -127,7 +127,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "ending_friendship",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "I'm glad we're friends. Come back to the pond anytime—I'll save you a lily pad and a poem.",
     backgroundKey: "pond_sunset",
     spriteExpression: "happy",
@@ -137,7 +137,7 @@ export const sampleNodes: DialogueNode[] = [
   {
     id: "ending_romance",
     characterId: "breadluvr",
-    speaker: "Breadluvr",
+    speaker: "Sam",
     text: "I think... I more-than-like you. Stay a little longer? The pond feels warmer when you're here.",
     backgroundKey: "pond_sunset",
     spriteExpression: "love",
