@@ -4,45 +4,26 @@ Vite serves this folder at `/assets/...`. Filenames must match exactly.
 
 ## Backgrounds → `backgrounds/`
 
-| File | Used when |
-|------|-----------|
-| `pond.png` | Opening pond scenes |
-| `island.png` | After lily-pad hop |
-| `pond_sunset.png` | Endings |
+- `pond.png`
+- `island.png`
+- `pond_sunset.png`
 
-Wired in: `client/src/assets/manifest.ts` → `backgroundSrc()` → `Background.tsx`
+## Player (you, left side of screen) → `player/`
 
-## Player (you, left side) → `player/`
+- `player_right.png` — used on stage (faces the duck)
+- `player_left.png` — optional spare facing
 
-| File | Notes |
-|------|--------|
-| `neutral.png` | Default |
-| `happy.png` | Optional |
-| `embarrassed.png` | Optional |
-| `determined.png` | Optional |
+## Ducks (right side of screen) → `ducks/`
 
-Wired in: `playerSrc()` → `CharacterStage.tsx`
+Each duck has **only** left + right facing (no expression folders):
 
-## Ducks (right side) → `ducks/{id}/`
+| Files |
+|-------|
+| `jock_left.png` / `jock_right.png` |
+| `breadluvr_left.png` / `breadluvr_right.png` |
+| `badboy_left.png` / `badboy_right.png` |
+| `artist_left.png` / `artist_right.png` |
 
-Four duck folders:
+On stage the duck uses `*_left.png` (faces the player). Love-bar portraits use `*_right.png`.
 
-```
-ducks/willow/   ducks/maple/   ducks/coral/   ducks/ash/
-```
-
-Per duck, add expression PNGs:
-
-| File | Sample story uses |
-|------|-------------------|
-| `neutral.png` | Yes |
-| `shy.png` | Yes (Willow) |
-| `hopeful.png` | Yes (Willow) |
-| `happy.png` | Yes |
-| `sad.png` | Yes |
-| `love.png` | Yes (romance ending) |
-
-Wired in: `duckSrc(spriteKey, expression)` → `CharacterStage.tsx`  
-Love-bar portraits: `duckPortraitSrc()` → `LoveMeters.tsx`
-
-Missing PNGs show a labeled placeholder so the game still runs.
+Path wiring: `client/src/assets/manifest.ts`

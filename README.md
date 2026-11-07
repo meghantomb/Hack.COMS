@@ -1,6 +1,6 @@
 # Pond Hearts
 
-Minimal browser duck dating sim (DDLC-inspired vertical slice). Four duck slots (Willow playable; Maple, Coral, Ash ready), love meters, branching dialogue, Lily Pad Hop gate, friendship / romance endings.
+Minimal browser duck dating sim (DDLC-inspired vertical slice). Four ducks (`jock`, `breadluvr`, `badboy`, `artist`) with left/right PNG slots; Breadluvr route playable; love meters; Lily Pad Hop; friendship / romance endings.
 
 ## Art (PNG slots)
 
@@ -42,10 +42,12 @@ Example:
 ```bash
 curl -s http://localhost:3001/api/generate/dialogue \
   -H 'Content-Type: application/json' \
-  -d '{"characterId":"willow","sceneContext":"Morning at the pond","tier":"friend","count":3}'
+  -d '{"characterId":"breadluvr","sceneContext":"Morning at the pond","tier":"friend","count":3}'
 ```
 
 Pass `"persist":true,"nodeId":"small_talk"` to insert validated options as flavor variations (same next-node as existing branches).
+
+Duck art filenames: `jock_left.png` / `jock_right.png` (same pattern for `breadluvr`, `badboy`, `artist`) in `client/public/assets/ducks/`.
 
 ## Scripts
 

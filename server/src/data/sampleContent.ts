@@ -5,44 +5,46 @@ import type {
   Minigame,
 } from "@duck-dating/shared";
 
-/** Four duck slots — spriteKey matches `client/public/assets/ducks/{spriteKey}/`. */
+/**
+ * Four duck slots. Art files (flat under client/public/assets/ducks/):
+ *   {spriteKey}_left.png  /  {spriteKey}_right.png
+ */
 export const sampleCharacters: Character[] = [
   {
-    id: "willow",
-    name: "Willow",
-    personality:
-      "A shy, soft-spoken mallard who loves quiet mornings at the pond, poetry about ripples, and brave little adventures when she trusts someone.",
-    spriteKey: "willow",
-    description: "Slot 1 — gentle duck; art: assets/ducks/willow/",
-  },
-  {
-    id: "maple",
-    name: "Maple",
+    id: "jock",
+    name: "Jock",
     personality:
       "Energetic and competitive; always organizing races around the reeds and daring others to keep up.",
-    spriteKey: "maple",
-    description: "Slot 2 — sporty duck; art: assets/ducks/maple/",
+    spriteKey: "jock",
+    description: "Art: ducks/jock_left.png & jock_right.png",
   },
   {
-    id: "coral",
-    name: "Coral",
+    id: "breadluvr",
+    name: "Breadluvr",
     personality:
-      "Dramatic club president vibes; loves speeches, snacks, and being the center of the pond social scene.",
-    spriteKey: "coral",
-    description: "Slot 3 — outgoing duck; art: assets/ducks/coral/",
+      "A soft-spoken duck who loves quiet mornings at the pond, poetry about ripples, and sharing snacks.",
+    spriteKey: "breadluvr",
+    description: "Art: ducks/breadluvr_left.png & breadluvr_right.png",
   },
   {
-    id: "ash",
-    name: "Ash",
+    id: "badboy",
+    name: "Badboy",
+    personality:
+      "Broody loner energy; acts cool by the deep end but notices every glance.",
+    spriteKey: "badboy",
+    description: "Art: ducks/badboy_left.png & badboy_right.png",
+  },
+  {
+    id: "artist",
+    name: "Artist",
     personality:
       "Quiet observer who sketches from the shadows and notices everything you almost said.",
-    spriteKey: "ash",
-    description: "Slot 4 — mysterious duck; art: assets/ducks/ash/",
+    spriteKey: "artist",
+    description: "Art: ducks/artist_left.png & artist_right.png",
   },
 ];
 
-export const sampleCharacter = sampleCharacters[0];
-
+export const sampleCharacter = sampleCharacters.find((c) => c.id === "breadluvr")!;
 
 export const sampleMinigame: Minigame = {
   id: "lily_pad_hop",
@@ -54,19 +56,19 @@ export const sampleMinigame: Minigame = {
 export const sampleNodes: DialogueNode[] = [
   {
     id: "pond_meet",
-    characterId: "willow",
+    characterId: "breadluvr",
     speaker: "Narrator",
-    text: "Morning mist curls over the campus pond. A duck in a reed headband glances up from a notebook of poems.",
+    text: "Morning mist curls over the campus pond. A duck glances up from a notebook of poems—and a suspiciously large pile of bread crumbs.",
     backgroundKey: "pond",
     spriteExpression: "neutral",
     isEnding: false,
     endingType: null,
   },
   {
-    id: "willow_hello",
-    characterId: "willow",
-    speaker: "Willow",
-    text: "Oh—hi. I didn't think anyone else came here this early. I'm Willow. Do you... like ponds too?",
+    id: "breadluvr_hello",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
+    text: "Oh—hi. I didn't think anyone else came here this early. I'm Breadluvr. Do you... like ponds too?",
     backgroundKey: "pond",
     spriteExpression: "shy",
     isEnding: false,
@@ -74,8 +76,8 @@ export const sampleNodes: DialogueNode[] = [
   },
   {
     id: "small_talk",
-    characterId: "willow",
-    speaker: "Willow",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
     text: "The water looks calm today. Sometimes I write about the way lily pads drift. It sounds silly when I say it out loud.",
     backgroundKey: "pond",
     spriteExpression: "neutral",
@@ -84,8 +86,8 @@ export const sampleNodes: DialogueNode[] = [
   },
   {
     id: "invite_hop",
-    characterId: "willow",
-    speaker: "Willow",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
     text: "There's a path of lily pads to the little island. I never try it alone... Would you hop across with me?",
     backgroundKey: "pond",
     spriteExpression: "hopeful",
@@ -94,8 +96,8 @@ export const sampleNodes: DialogueNode[] = [
   },
   {
     id: "after_hop_win",
-    characterId: "willow",
-    speaker: "Willow",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
     text: "You made it! My heart's still racing. Thank you for going with me. I feel... safer when you're around.",
     backgroundKey: "island",
     spriteExpression: "happy",
@@ -104,8 +106,8 @@ export const sampleNodes: DialogueNode[] = [
   },
   {
     id: "after_decline",
-    characterId: "willow",
-    speaker: "Willow",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
     text: "That's okay. We can just sit here. The ripples are company enough... most days.",
     backgroundKey: "pond",
     spriteExpression: "sad",
@@ -114,8 +116,8 @@ export const sampleNodes: DialogueNode[] = [
   },
   {
     id: "deeper_chat",
-    characterId: "willow",
-    speaker: "Willow",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
     text: "Can I ask something? When you talk to me, do you mean it... or are you just being polite?",
     backgroundKey: "island",
     spriteExpression: "shy",
@@ -124,8 +126,8 @@ export const sampleNodes: DialogueNode[] = [
   },
   {
     id: "ending_friendship",
-    characterId: "willow",
-    speaker: "Willow",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
     text: "I'm glad we're friends. Come back to the pond anytime—I'll save you a lily pad and a poem.",
     backgroundKey: "pond_sunset",
     spriteExpression: "happy",
@@ -134,8 +136,8 @@ export const sampleNodes: DialogueNode[] = [
   },
   {
     id: "ending_romance",
-    characterId: "willow",
-    speaker: "Willow",
+    characterId: "breadluvr",
+    speaker: "Breadluvr",
     text: "I think... I more-than-like you. Stay a little longer? The pond feels warmer when you're here.",
     backgroundKey: "pond_sunset",
     spriteExpression: "love",
@@ -145,12 +147,11 @@ export const sampleNodes: DialogueNode[] = [
 ];
 
 export const sampleOptions: DialogueOption[] = [
-  // pond_meet
   {
     id: "opt_approach",
     nodeId: "pond_meet",
     text: "Approach quietly and say hello.",
-    nextNodeId: "willow_hello",
+    nextNodeId: "breadluvr_hello",
     friendlinessDelta: 5,
     requiredTier: null,
     minigameId: null,
@@ -160,16 +161,15 @@ export const sampleOptions: DialogueOption[] = [
     id: "opt_wave",
     nodeId: "pond_meet",
     text: "Wave from the shore with a big smile.",
-    nextNodeId: "willow_hello",
+    nextNodeId: "breadluvr_hello",
     friendlinessDelta: 8,
     requiredTier: null,
     minigameId: null,
     sortOrder: 1,
   },
-  // willow_hello
   {
     id: "opt_like_ponds",
-    nodeId: "willow_hello",
+    nodeId: "breadluvr_hello",
     text: "I love quiet ponds. Mind if I join you?",
     nextNodeId: "small_talk",
     friendlinessDelta: 12,
@@ -179,7 +179,7 @@ export const sampleOptions: DialogueOption[] = [
   },
   {
     id: "opt_poetry",
-    nodeId: "willow_hello",
+    nodeId: "breadluvr_hello",
     text: "Is that a poetry notebook? I'd love to hear a line.",
     nextNodeId: "small_talk",
     friendlinessDelta: 15,
@@ -189,7 +189,7 @@ export const sampleOptions: DialogueOption[] = [
   },
   {
     id: "opt_awkward",
-    nodeId: "willow_hello",
+    nodeId: "breadluvr_hello",
     text: "Uh... nice weather for ducks?",
     nextNodeId: "small_talk",
     friendlinessDelta: 3,
@@ -197,7 +197,6 @@ export const sampleOptions: DialogueOption[] = [
     minigameId: null,
     sortOrder: 2,
   },
-  // small_talk
   {
     id: "opt_not_silly",
     nodeId: "small_talk",
@@ -218,7 +217,6 @@ export const sampleOptions: DialogueOption[] = [
     minigameId: null,
     sortOrder: 1,
   },
-  // invite_hop — minigame-gated path + decline
   {
     id: "opt_hop_yes",
     nodeId: "invite_hop",
@@ -239,7 +237,6 @@ export const sampleOptions: DialogueOption[] = [
     minigameId: null,
     sortOrder: 1,
   },
-  // after_hop_win
   {
     id: "opt_safer",
     nodeId: "after_hop_win",
@@ -260,7 +257,6 @@ export const sampleOptions: DialogueOption[] = [
     minigameId: null,
     sortOrder: 1,
   },
-  // after_decline
   {
     id: "opt_sit",
     nodeId: "after_decline",
@@ -281,7 +277,6 @@ export const sampleOptions: DialogueOption[] = [
     minigameId: null,
     sortOrder: 1,
   },
-  // deeper_chat → endings based on tier gates
   {
     id: "opt_mean_it",
     nodeId: "deeper_chat",

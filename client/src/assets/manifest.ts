@@ -1,51 +1,45 @@
 /**
- * PNG asset slots — drop files under `client/public/assets/` using these paths.
- * After replacing a PNG, hard-refresh the browser (no code change needed if the filename matches).
+ * PNG asset slots — drop files under `client/public/assets/`.
  *
- * Folder layout:
- *   public/assets/backgrounds/{key}.png
- *   public/assets/player/{expression}.png
- *   public/assets/ducks/{duckId}/{expression}.png
+ * Ducks (left/right facing only):
+ *   ducks/jock_left.png      ducks/jock_right.png
+ *   ducks/breadluvr_left.png ducks/breadluvr_right.png
+ *   ducks/badboy_left.png    ducks/badboy_right.png
+ *   ducks/artist_left.png    ducks/artist_right.png
  *
- * Duck IDs: willow | maple | coral | ash
- * Expressions used in sample story: neutral, shy, hopeful, happy, sad, love
- * Background keys used in sample story: pond, island, pond_sunset
+ * Player (MC):
+ *   player/player_left.png   player/player_right.png
+ *
+ * Backgrounds:
+ *   backgrounds/pond.png | island.png | pond_sunset.png
+ *
+ * Staging: MC on the left uses *_right (faces center); duck on the right uses *_left.
  */
 
-export const DUCK_IDS = ["willow", "maple", "coral", "ash"] as const;
+export const DUCK_IDS = ["jock", "breadluvr", "badboy", "artist"] as const;
 export type DuckId = (typeof DUCK_IDS)[number];
 
-export const DUCK_EXPRESSIONS = [
-  "neutral",
-  "shy",
-  "hopeful",
-  "happy",
-  "sad",
-  "love",
-] as const;
-
-export const PLAYER_EXPRESSIONS = ["neutral", "happy", "embarrassed", "determined"] as const;
+export type Facing = "left" | "right";
 
 export const BACKGROUND_KEYS = ["pond", "island", "pond_sunset"] as const;
 
 const asset = (path: string) => `/assets/${path}`;
 
-/** Background PNG path for a dialogue `backgroundKey`. */
 export function backgroundSrc(key: string): string {
   return asset(`backgrounds/${key}.png`);
 }
 
-/** Player (MC) sprite on the left side. */
-export function playerSrc(expression = "neutral"): string {
-  return asset(`player/${expression}.png`);
+/** Player on the left side of the screen → usually `right` (faces the duck). */
+export function playerSrc(facing: Facing = "right"): string {
+  return asset(`player/player_${facing}.png`);
 }
 
-/** Duck sprite on the right side — `spriteKey` is the duck folder name / character id. */
-export function duckSrc(spriteKey: string, expression = "neutral"): string {
-  return asset(`ducks/${spriteKey}/${expression}.png`);
+/** Duck sprite — `spriteKey` is jock | breadluvr | badboy | artist. */
+export function duckSrc(spriteKey: string, facing: Facing): string {
+  return asset(`ducks/${spriteKey}_${facing}.png`);
 }
 
-/** Small portrait for love-meter HUD (uses neutral pose). */
+/** Love-meter portrait (right-facing crop works fine). */
 export function duckPortraitSrc(spriteKey: string): string {
-  return duckSrc(spriteKey, "neutral");
+  return duckSrc(spriteKey, "right");
 }

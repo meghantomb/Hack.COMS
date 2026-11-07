@@ -72,7 +72,6 @@ export default function App() {
         <CharacterStage
           duckName={bundle.character.name}
           duckSpriteKey={bundle.character.spriteKey}
-          duckExpression={bundle.node.spriteExpression}
           showDuck={!bundle.node.isEnding || Boolean(bundle.node.endingType)}
         />
       )}

@@ -97,8 +97,8 @@ export interface DialogueBundle {
   loveMeters: LoveMeter[];
 }
 
-/** The four dateable duck character IDs (asset folders match these). */
-export const DUCK_CHARACTER_IDS = ["willow", "maple", "coral", "ash"] as const;
+/** The four dateable duck IDs — art files: `{id}_left.png` / `{id}_right.png`. */
+export const DUCK_CHARACTER_IDS = ["jock", "breadluvr", "badboy", "artist"] as const;
 
 
 export interface ChoiceRequest {
@@ -142,5 +142,5 @@ export interface AiGenerationResult {
 }
 
 export const DEFAULT_PLAYER_ID = "local-player";
-export const SAMPLE_CHARACTER_ID = "willow";
+export const SAMPLE_CHARACTER_ID = "breadluvr";
 export const START_NODE_ID = "pond_meet";
