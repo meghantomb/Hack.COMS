@@ -1,7 +1,8 @@
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
-import pg from "pg";
+import type pg from "pg";
 import * as schema from "./schema";
 import { memoryStore } from "./memoryStore";
+import { createPgPool } from "./pgPool";
 
 export type Db = NodePgDatabase<typeof schema>;
 
@@ -15,7 +16,7 @@ export function isUsingDatabase(): boolean {
 export function getDb(): Db | null {
   if (!isUsingDatabase()) return null;
   if (!db) {
-    pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+    pool = createPgPool(process.env.DATABASE_URL!);
     db = drizzle(pool, { schema });
   }
   return db;

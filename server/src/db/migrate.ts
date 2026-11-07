@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { readFileSync, existsSync, readdirSync } from "fs";
 import { join, resolve } from "path";
-import pg from "pg";
+import { createPgPool } from "./pgPool";
 
 dotenv.config({ path: resolve(__dirname, "../../../.env") });
 dotenv.config();
@@ -14,7 +14,7 @@ async function migrate() {
     process.exit(0);
   }
 
-  const pool = new pg.Pool({ connectionString: url });
+  const pool = createPgPool(url);
   const client = await pool.connect();
 
   try {

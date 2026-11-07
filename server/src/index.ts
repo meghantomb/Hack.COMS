@@ -8,7 +8,7 @@ import { generateRouter } from "./routes/generate";
 import { isUsingDatabase } from "./db";
 import { ensurePlayer } from "./services/gameService";
 
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 dotenv.config();
 
 
