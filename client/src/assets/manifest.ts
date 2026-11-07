@@ -31,7 +31,7 @@ export function backgroundSrc(key: string): string {
 
 /** Player on the left side of the screen → usually `right` (faces the duck). */
 export function playerSrc(facing: Facing = "right"): string {
-  return asset(`player/player_${facing}.png`);
+  return asset(`player/bread.png`);
 }
 
 /** Duck sprite — `spriteKey` is jock | breadluvr | badboy | artist. */
