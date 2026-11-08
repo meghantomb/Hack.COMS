@@ -4,6 +4,7 @@ import {
   SAMPLE_CHARACTER_ID,
   START_NODE_ID,
   applyChoiceProgress,
+  bookmarkGraph,
   getFriendlinessTier,
   readBookmarks,
   rememberDuckPlace,
@@ -90,6 +91,11 @@ export class MemoryStore {
 
   private relKey(playerId: string, characterId: string) {
     return `${playerId}::${characterId}`;
+  }
+
+  private placeGraph() {
+    this.hydrate();
+    return bookmarkGraph([...this.nodes.values()], [...this.options.values()]);
   }
 
   getFriendliness(playerId: string, characterId: string): number {
@@ -270,6 +276,7 @@ export class MemoryStore {
       fromConversationId: node.conversationId,
       scriptedNext: nextNode,
       resumeNode,
+      bookmarkGraph: this.placeGraph(),
       progress: {
         exchangeCount: progress.exchangeCount,
         consecutiveConversations: progress.consecutiveConversations,
@@ -327,13 +334,17 @@ export class MemoryStore {
     const node = this.nodes.get(currentNodeId);
     let bookmarks = readBookmarks(existing.bookmarks);
     if (node && node.id !== START_NODE_ID) {
-      bookmarks = rememberDuckPlace(bookmarks, {
-        nodeId: node.id,
-        characterId: node.characterId,
-        conversationId: node.conversationId,
-        exchangeCount: existing.exchangeCount,
-        consecutiveConversations: existing.consecutiveConversations,
-      });
+      bookmarks = rememberDuckPlace(
+        bookmarks,
+        {
+          nodeId: node.id,
+          characterId: node.characterId,
+          conversationId: node.conversationId,
+          exchangeCount: existing.exchangeCount,
+          consecutiveConversations: existing.consecutiveConversations,
+        },
+        this.placeGraph()
+      );
     }
     const progress: PlayerProgress = {
       ...existing,

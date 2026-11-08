@@ -5,6 +5,7 @@ import type {
   DialogueOption,
   Minigame,
 } from "@duck-dating/shared";
+import { attachMinigameChoices } from "./attachMinigames";
 
 /**
  * Four duck slots. Art files (flat under client/public/assets/ducks/):
@@ -166,7 +167,7 @@ export const shoreNodes: DialogueNode[] = [
     characterId: "breadluvr",
     conversationId: null,
     speaker: "Narrator",
-    text: "The hill ends at the campus pond. One duck waits in the sun, already staring like he has been hungry for you his whole life. At the far bank, another sits in the dark and pretends he has not seen you roll in. A third is racing the reeds, grinning like the water is a track. In the shade, a fourth is already drawing, as if the page expected you.",
+    text: "The hill ends at the pond. One duck waits in the sun, already staring like he has been hungry for you his whole life. At the far bank, another sits in the dark and pretends he has not seen you roll in. A third is racing the reeds, grinning like the water is a track. In the shade, a fourth is already drawing, as if the page expected you.",
     backgroundKey: "pond",
     spriteExpression: "neutral",
     isEnding: false,
@@ -624,7 +625,7 @@ export const shoreOptions: DialogueOption[] = [
   }),
 ];
 
-export const samOptions: DialogueOption[] = [
+const samOptionsBase: DialogueOption[] = [
   // ---- Conversation 1 ----
   reply({
     id: "opt_approach",
@@ -647,7 +648,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "pond_meet",
     text: "Stay half-hidden in the reeds and wait.",
     nextNodeId: "breadluvr_hello",
-    friendlinessDelta: 2,
+    friendlinessDelta: 0,
     sortOrder: 2,
   }),
   reply({
@@ -655,7 +656,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "breadluvr_hello",
     text: "The kitchen was going to eat me. Can I stay near you?",
     nextNodeId: "small_talk",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -663,7 +664,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "breadluvr_hello",
     text: "You look a little overwhelmed. Should I be nervous?",
     nextNodeId: "small_talk",
-    friendlinessDelta: 4,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -671,7 +672,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "breadluvr_hello",
     text: "Could you look at me like I'm not lunch?",
     nextNodeId: "small_talk",
-    friendlinessDelta: -2,
+    friendlinessDelta: -6,
     sortOrder: 2,
   }),
   reply({
@@ -679,7 +680,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "small_talk",
     text: "That's sweet. A little intense. I'll stay.",
     nextNodeId: "watched",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -687,7 +688,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "small_talk",
     text: "If you like me, maybe don't think about eating me.",
     nextNodeId: "watched",
-    friendlinessDelta: 18,
+    friendlinessDelta: 12,
     requiredTier: "acquaintance",
     minFriendliness: 20,
     sortOrder: 1,
@@ -697,7 +698,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "small_talk",
     text: "You know that isn't how liking someone usually works, right?",
     nextNodeId: "watched",
-    friendlinessDelta: 2,
+    friendlinessDelta: -4,
     sortOrder: 2,
   }),
   reply({
@@ -705,7 +706,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "watched",
     text: "Then I won't look. I'm here with you.",
     nextNodeId: "invite_hop",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -713,7 +714,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "watched",
     text: "I can glance without leaving.",
     nextNodeId: "xander_noticed",
-    friendlinessDelta: 6,
+    friendlinessDelta: 4,
     sortOrder: 1,
   }),
   reply({
@@ -721,7 +722,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "watched",
     text: "Wave him over. If he's going to stare, he can say it.",
     nextNodeId: "xander_joins",
-    friendlinessDelta: -4,
+    friendlinessDelta: -8,
     sortOrder: 2,
   }),
   reply({
@@ -729,7 +730,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "xander_joins",
     text: "I'm not takeout.",
     nextNodeId: "sam_after_xander",
-    friendlinessDelta: 2,
+    friendlinessDelta: 0,
     sortOrder: 0,
   }),
   reply({
@@ -737,7 +738,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "xander_joins",
     text: "I'm talking to Sam.",
     nextNodeId: "sam_after_xander",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 1,
   }),
   reply({
@@ -745,7 +746,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "xander_joins",
     text: "Hi. There's room.",
     nextNodeId: "sam_after_xander",
-    friendlinessDelta: -6,
+    friendlinessDelta: -10,
     sortOrder: 2,
   }),
   reply({
@@ -753,7 +754,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "sam_after_xander",
     text: "I'm staying. He can be mysterious somewhere else.",
     nextNodeId: "invite_hop",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -769,7 +770,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "sam_after_xander",
     text: "Takeout was rude. I'll stay if you keep your beak to yourself.",
     nextNodeId: "invite_hop",
-    friendlinessDelta: 4,
+    friendlinessDelta: 0,
     sortOrder: 2,
   }),
   reply({
@@ -777,7 +778,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "xander_noticed",
     text: "You noticed me first. I'm not going anywhere.",
     nextNodeId: "invite_hop",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -785,15 +786,15 @@ export const samOptions: DialogueOption[] = [
     nodeId: "xander_noticed",
     text: "He can look. Looking isn't the same as wanting a snack.",
     nextNodeId: "invite_hop",
-    friendlinessDelta: 4,
+    friendlinessDelta: 2,
     sortOrder: 1,
   }),
   reply({
     id: "opt_hop_yes",
     nodeId: "invite_hop",
-    text: "I'll hop. Stay where I can see you.",
+    text: "Let's play something. Stay where I can see you.",
     nextNodeId: "after_hop_win",
-    friendlinessDelta: 20,
+    friendlinessDelta: 16,
     minigameId: "bread_snake",
     sortOrder: 0,
   }),
@@ -808,9 +809,9 @@ export const samOptions: DialogueOption[] = [
   reply({
     id: "opt_hop_yes_close",
     nodeId: "invite_hop_close",
-    text: "I'll hop. Stay where I can see you.",
+    text: "I'll take the challenge. Stay close.",
     nextNodeId: "after_hop_win",
-    friendlinessDelta: 20,
+    friendlinessDelta: 16,
     minigameId: "bread_snake",
     sortOrder: 0,
   }),
@@ -827,7 +828,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "after_hop_win",
     text: "I like that you wanted some time just with me.",
     nextNodeId: "close_after_hop",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -835,7 +836,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "after_hop_win",
     text: "Leaving the crumbs is nice. The staring is still a little much.",
     nextNodeId: "close_after_hop",
-    friendlinessDelta: 6,
+    friendlinessDelta: 2,
     sortOrder: 1,
   }),
   // Better reply: only reachable after winning Lily Pad Hop.
@@ -844,18 +845,27 @@ export const samOptions: DialogueOption[] = [
     nodeId: "after_hop_win",
     text: "If you want me around, let's stay in the sun. No nibbling.",
     nextNodeId: "close_after_hop",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     requiredTier: "acquaintance",
     minFriendliness: 20,
     requiresMinigameWin: true,
     sortOrder: 2,
   }),
   reply({
+    id: "after_hop_win_shore",
+    nodeId: "after_hop_win",
+    text: "Go see who else is on the pond.",
+    nextNodeId: "pond_shore",
+    friendlinessDelta: 0,
+    continuesConversation: false,
+    sortOrder: 3,
+  }),
+  reply({
     id: "opt_sitting_is_enough",
     nodeId: "after_decline",
     text: "Sitting here is enough.",
     nextNodeId: "close_shore",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 0,
   }),
   reply({
@@ -863,8 +873,17 @@ export const samOptions: DialogueOption[] = [
     nodeId: "after_decline",
     text: "The hop felt like you were trying to hide me.",
     nextNodeId: "close_shore",
-    friendlinessDelta: 4,
+    friendlinessDelta: -2,
     sortOrder: 1,
+  }),
+  reply({
+    id: "after_decline_shore",
+    nodeId: "after_decline",
+    text: "Go see who else is on the pond.",
+    nextNodeId: "pond_shore",
+    friendlinessDelta: 0,
+    continuesConversation: false,
+    sortOrder: 2,
   }),
 
   ...visitExit("close_after_hop", "c2_return", "Talk to him again later."),
@@ -876,7 +895,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_return",
     text: "I came back. You look like you haven't moved.",
     nextNodeId: "c2_hello",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 0,
   }),
   reply({
@@ -884,7 +903,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_return",
     text: "You're staring again.",
     nextNodeId: "c2_hello",
-    friendlinessDelta: 2,
+    friendlinessDelta: -4,
     sortOrder: 1,
   }),
   reply({
@@ -892,7 +911,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_hello",
     text: "I wanted to see you too. That's either brave or stupid.",
     nextNodeId: "c2_practice",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -900,7 +919,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_hello",
     text: "You can just say you missed me.",
     nextNodeId: "c2_practice",
-    friendlinessDelta: -2,
+    friendlinessDelta: 4,
     sortOrder: 1,
   }),
   reply({
@@ -908,7 +927,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_hello_close",
     text: "I wanted to see you too. That's either brave or stupid.",
     nextNodeId: "c2_practice",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -916,7 +935,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_hello_close",
     text: "You heard me coming?",
     nextNodeId: "c2_practice",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 1,
   }),
   reply({
@@ -924,7 +943,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_practice",
     text: "That's a strange way to say you like me. I'll take it.",
     nextNodeId: "c2_ryan_spotted",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -932,7 +951,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_practice",
     text: "If you like me, keep practicing the sitting-still part.",
     nextNodeId: "c2_ryan_spotted",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     requiredTier: "friend",
     minFriendliness: 40,
     sortOrder: 1,
@@ -942,7 +961,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_practice",
     text: "You know you say that like it should comfort me.",
     nextNodeId: "c2_ryan_spotted",
-    friendlinessDelta: 4,
+    friendlinessDelta: -2,
     sortOrder: 2,
   }),
   reply({
@@ -950,7 +969,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ryan_spotted",
     text: "Let him jog past. I'm not going anywhere.",
     nextNodeId: "c2_ryan_passes",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -958,7 +977,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ryan_spotted",
     text: "Wave Ryan over. He already saw me.",
     nextNodeId: "c2_ryan_joins",
-    friendlinessDelta: -4,
+    friendlinessDelta: -8,
     sortOrder: 1,
   }),
   reply({
@@ -966,7 +985,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ryan_joins",
     text: "I'm not doing laps. I just got comfortable.",
     nextNodeId: "c2_after_ryan",
-    friendlinessDelta: 6,
+    friendlinessDelta: 4,
     sortOrder: 0,
   }),
   reply({
@@ -974,7 +993,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ryan_joins",
     text: "Sam and I are in the middle of something.",
     nextNodeId: "c2_after_ryan",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 1,
   }),
   reply({
@@ -982,7 +1001,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ryan_joins",
     text: "Branding? What would you even put me on?",
     nextNodeId: "c2_after_ryan",
-    friendlinessDelta: -6,
+    friendlinessDelta: -10,
     sortOrder: 2,
   }),
   reply({
@@ -990,7 +1009,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_after_ryan",
     text: "A flyer is a lot. Sitting here is enough.",
     nextNodeId: "c2_ask",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 0,
   }),
   reply({
@@ -998,7 +1017,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_after_ryan",
     text: "Tell him again. I came back for you, not a flyer.",
     nextNodeId: "c2_ask",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 1,
   }),
   reply({
@@ -1006,7 +1025,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ryan_passes",
     text: "I'm glad you wanted me to see the nice part first.",
     nextNodeId: "c2_ask",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -1014,7 +1033,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ryan_passes",
     text: "Jealous is okay. Just don't get weird about it.",
     nextNodeId: "c2_ask",
-    friendlinessDelta: 2,
+    friendlinessDelta: 0,
     sortOrder: 1,
   }),
   reply({
@@ -1022,7 +1041,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ask",
     text: "I'll stay a while.",
     nextNodeId: "c2_close_warm",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -1030,7 +1049,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c2_ask",
     text: "If it was a frog, it was a very suspicious frog.",
     nextNodeId: "c2_close_warm",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 1,
   }),
 
@@ -1043,7 +1062,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_arrive",
     text: "You look tense. Come sit before you overthink this.",
     nextNodeId: "c3_almost",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -1051,7 +1070,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_arrive",
     text: "That's close enough. Eyes up here.",
     nextNodeId: "c3_almost",
-    friendlinessDelta: 4,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -1059,7 +1078,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_almost",
     text: "I'm glad you stopped. That matters.",
     nextNodeId: "c3_honest",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -1067,7 +1086,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_almost",
     text: "You almost ate a crumb off me and you want credit?",
     nextNodeId: "c3_honest",
-    friendlinessDelta: -4,
+    friendlinessDelta: -8,
     sortOrder: 1,
   }),
   reply({
@@ -1075,7 +1094,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_almost",
     text: "You thought of me instead. That... helps, actually.",
     nextNodeId: "c3_honest",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     requiredTier: "friend",
     minFriendliness: 40,
     sortOrder: 2,
@@ -1085,7 +1104,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_honest",
     text: "I can sit with both, as long as liking me stays louder.",
     nextNodeId: "c3_jeremy_spotted",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -1093,7 +1112,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_honest",
     text: "Wanting a snack isn't as romantic as you think.",
     nextNodeId: "c3_jeremy_spotted",
-    friendlinessDelta: 2,
+    friendlinessDelta: -4,
     sortOrder: 1,
   }),
   reply({
@@ -1101,7 +1120,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_honest_close",
     text: "Then stay with me until you get there. Me still being here is the deal.",
     nextNodeId: "c3_jeremy_spotted",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -1109,7 +1128,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_honest_close",
     text: "That still sounds a little like a recipe.",
     nextNodeId: "c3_jeremy_spotted",
-    friendlinessDelta: 6,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -1117,7 +1136,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_jeremy_spotted",
     text: "Let him draw leaves. This is ours.",
     nextNodeId: "c3_jeremy_stays_hidden",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -1125,7 +1144,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_jeremy_spotted",
     text: "Wave Jeremy over. If he's already drawing me, he can do it in the open.",
     nextNodeId: "c3_jeremy_joins",
-    friendlinessDelta: -2,
+    friendlinessDelta: -6,
     sortOrder: 1,
   }),
   reply({
@@ -1133,7 +1152,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_jeremy_joins",
     text: "I'm not a still life. I'm talking to Sam.",
     nextNodeId: "c3_after_jeremy",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 0,
   }),
   reply({
@@ -1141,7 +1160,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_jeremy_joins",
     text: "He's right. I still haven't decided if staying is wise.",
     nextNodeId: "c3_after_jeremy",
-    friendlinessDelta: 2,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -1149,7 +1168,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_jeremy_joins",
     text: "You can keep drawing. Just don't make me look like dinner.",
     nextNodeId: "c3_after_jeremy",
-    friendlinessDelta: -4,
+    friendlinessDelta: -6,
     sortOrder: 2,
   }),
   reply({
@@ -1157,7 +1176,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_after_jeremy",
     text: "I'm looking at you. He can have the outline.",
     nextNodeId: "c3_ask",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -1165,7 +1184,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_after_jeremy",
     text: "Hiding the page is not as funny as you think.",
     nextNodeId: "c3_ask",
-    friendlinessDelta: 4,
+    friendlinessDelta: 0,
     sortOrder: 1,
   }),
   reply({
@@ -1173,7 +1192,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_jeremy_stays_hidden",
     text: "Some things can stay just ours.",
     nextNodeId: "c3_ask",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -1181,7 +1200,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_jeremy_stays_hidden",
     text: "You get pretty happy when I sit close, huh?",
     nextNodeId: "c3_ask",
-    friendlinessDelta: 2,
+    friendlinessDelta: 6,
     sortOrder: 1,
   }),
   reply({
@@ -1189,7 +1208,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_ask",
     text: "I'll sit this close. I'm not promising anything bigger yet.",
     nextNodeId: "c3_close",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 0,
   }),
   reply({
@@ -1197,7 +1216,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c3_ask",
     text: "If it's really about liking me, I'll listen when the light gets long.",
     nextNodeId: "c3_close",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     requiredTier: "crush",
     minFriendliness: 50,
     sortOrder: 1,
@@ -1211,7 +1230,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_sunset",
     text: "I came. You look like you've been waiting all day.",
     nextNodeId: "c4_hello",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 0,
   }),
   reply({
@@ -1219,7 +1238,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_sunset",
     text: "You look nervous. That makes two of us.",
     nextNodeId: "c4_hello",
-    friendlinessDelta: 4,
+    friendlinessDelta: 6,
     sortOrder: 1,
   }),
   reply({
@@ -1227,7 +1246,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_hello",
     text: "You've been good. I noticed.",
     nextNodeId: "c4_others",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -1235,7 +1254,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_hello",
     text: "Best behavior is good. You don't have to burst about it.",
     nextNodeId: "c4_others",
-    friendlinessDelta: -4,
+    friendlinessDelta: -6,
     sortOrder: 1,
   }),
   reply({
@@ -1243,7 +1262,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_hello_close",
     text: "I hear you. Say the rest.",
     nextNodeId: "c4_others",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -1251,7 +1270,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_hello_close",
     text: "I love you too. That still scares me a little.",
     nextNodeId: "c4_others",
-    friendlinessDelta: 20,
+    friendlinessDelta: 18,
     requiredTier: "crush",
     minFriendliness: 50,
     sortOrder: 1,
@@ -1261,7 +1280,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_others",
     text: "Then ask them for space. I came here for you.",
     nextNodeId: "c4_question",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -1269,7 +1288,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_others",
     text: "I don't belong to anyone. Not even you.",
     nextNodeId: "c4_question",
-    friendlinessDelta: 2,
+    friendlinessDelta: -8,
     sortOrder: 1,
   }),
   reply({
@@ -1287,7 +1306,7 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_question",
     text: "I don't want to be eaten. Not even nicely.",
     nextNodeId: "ending_bad",
-    friendlinessDelta: 2,
+    friendlinessDelta: -12,
     sortOrder: 1,
   }),
   reply({
@@ -1295,9 +1314,29 @@ export const samOptions: DialogueOption[] = [
     nodeId: "c4_question",
     text: "I trust you. That still doesn't mean I'm dinner.",
     nextNodeId: "ending_bad",
-    friendlinessDelta: 8,
+    friendlinessDelta: -6,
     requiredTier: "friend",
     minFriendliness: 40,
     sortOrder: 2,
   }),
 ];
+
+/** First launch is Bread Snake. Later ids stay bread_snake; the client picks the random pool after that win. */
+export const samOptions: DialogueOption[] = attachMinigameChoices(samOptionsBase, "bread_snake", [
+  { nodeId: "pond_meet", id: "opt_mg_pond_meet", text: "I'll follow the crumbs. Don't lose me." },
+  { nodeId: "small_talk", id: "opt_mg_small_talk", text: "Let's play something." },
+  { nodeId: "xander_joins", id: "opt_mg_xander_joins", text: "I'll take the challenge." },
+  { nodeId: "xander_noticed", id: "opt_mg_xander_noticed", text: "How about a game?" },
+  { nodeId: "after_decline", id: "opt_mg_after_decline", text: "I'll play, if you will." },
+  { nodeId: "c2_hello", id: "opt_mg_c2_hello", text: "Make it a game. I'm in." },
+  { nodeId: "c2_practice", id: "opt_mg_c2_practice", text: "I'll take you on." },
+  { nodeId: "c2_ryan_joins", id: "opt_mg_c2_ryan_joins", text: "A game, then. I'm ready." },
+  { nodeId: "c2_ryan_passes", id: "opt_mg_c2_ryan_passes", text: "Let's make a game of it." },
+  { nodeId: "c3_arrive", id: "opt_mg_c3_arrive", text: "Let's play something." },
+  { nodeId: "c3_honest", id: "opt_mg_c3_honest", text: "I'll take the challenge." },
+  { nodeId: "c3_jeremy_spotted", id: "opt_mg_c3_jeremy_spotted", text: "How about a game?" },
+  { nodeId: "c3_after_jeremy", id: "opt_mg_c3_after_jeremy", text: "I'll play, if you will." },
+  { nodeId: "c3_ask", id: "opt_mg_c3_ask", text: "Make it a game. I'm in." },
+  { nodeId: "c4_hello", id: "opt_mg_c4_hello", text: "I'll take you on." },
+  { nodeId: "c4_others", id: "opt_mg_c4_others", text: "A game, then. I'm ready." },
+]);

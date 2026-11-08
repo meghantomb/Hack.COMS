@@ -1,4 +1,5 @@
 import type { Conversation, DialogueNode, DialogueOption } from "@duck-dating/shared";
+import { attachMinigameChoices } from "./attachMinigames";
 
 export const XANDER_CONVERSATION_ID = "xander_first_meeting";
 export const XANDER_SECOND_CONVERSATION_ID = "xander_comes_back";
@@ -444,7 +445,7 @@ export const xanderNodes: DialogueNode[] = [
   }),
 ];
 
-export const xanderOptions: DialogueOption[] = [
+const xanderOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_x_roll_closer",
     nodeId: "xander_deep_end_meet",
@@ -466,7 +467,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_deep_end_meet",
     text: "Call out. Ask if this bank is taken.",
     nextNodeId: "xander_you_noticed",
-    friendlinessDelta: 3,
+    friendlinessDelta: 0,
     sortOrder: 2,
   }),
   reply({
@@ -474,7 +475,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_you_noticed",
     text: "I wasn't staring. You just look like you'd rather be alone.",
     nextNodeId: "xander_reputation",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -498,7 +499,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_you_noticed",
     text: "You notice more than you let on. I like that.",
     nextNodeId: "xander_reputation",
-    friendlinessDelta: 16,
+    friendlinessDelta: 12,
     requiredTier: "acquaintance",
     minFriendliness: 20,
     sortOrder: 3,
@@ -508,24 +509,16 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_reputation",
     text: "I don't need the story. I'm still here.",
     nextNodeId: "xander_trust",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     sortOrder: 0,
-  }),
-  reply({
-    id: "opt_x_defending",
-    nodeId: "xander_reputation",
-    text: "Must've been defending something.",
-    nextNodeId: "xander_trust",
-    friendlinessDelta: 10,
-    sortOrder: 1,
   }),
   reply({
     id: "opt_x_what_happened",
     nodeId: "xander_reputation",
     text: "A few times? What happened?",
     nextNodeId: "xander_pressed",
-    friendlinessDelta: -4,
-    sortOrder: 2,
+    friendlinessDelta: -10,
+    sortOrder: 1,
   }),
   reply({
     id: "opt_x_postcard",
@@ -535,14 +528,14 @@ export const xanderOptions: DialogueOption[] = [
     friendlinessDelta: 12,
     requiredTier: "acquaintance",
     minFriendliness: 20,
-    sortOrder: 3,
+    sortOrder: 2,
   }),
   reply({
     id: "opt_x_stop_asking",
     nodeId: "xander_pressed",
     text: "Fair. I'll stop asking.",
     nextNodeId: "xander_trust",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 0,
   }),
   reply({
@@ -550,7 +543,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_pressed",
     text: "You don't make earning anything easy.",
     nextNodeId: "xander_trust",
-    friendlinessDelta: 4,
+    friendlinessDelta: 0,
     sortOrder: 1,
   }),
   reply({
@@ -558,7 +551,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_detail",
     text: "That's enough. Thank you.",
     nextNodeId: "xander_trust",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -566,7 +559,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_detail",
     text: "Louder than what?",
     nextNodeId: "xander_pressed",
-    friendlinessDelta: -2,
+    friendlinessDelta: -4,
     sortOrder: 1,
   }),
   reply({
@@ -590,7 +583,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_ryan_shows",
     text: "Shift closer to him before Ryan can.",
     nextNodeId: "xander_invite",
-    friendlinessDelta: 12,
+    friendlinessDelta: 8,
     sortOrder: 0,
   }),
   reply({
@@ -598,15 +591,15 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_ryan_shows",
     text: "Stay quiet and watch him go still.",
     nextNodeId: "xander_invite",
-    friendlinessDelta: 6,
+    friendlinessDelta: 4,
     sortOrder: 1,
   }),
   reply({
     id: "opt_x_hop_yes",
     nodeId: "xander_invite",
-    text: "I'll hop. Don't you dare leave me in the water.",
+    text: "I'll take you on. Don't disappear on me.",
     nextNodeId: "xander_after_hop",
-    friendlinessDelta: 20,
+    friendlinessDelta: 16,
     minigameId: "bullet_hell",
     sortOrder: 0,
   }),
@@ -615,8 +608,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_invite",
     text: "Are you asking me, or daring me?",
     nextNodeId: "xander_after_hop",
-    friendlinessDelta: 12,
-    minigameId: "bullet_hell",
+    friendlinessDelta: 10,
     sortOrder: 1,
   }),
   reply({
@@ -640,7 +632,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_after_hop",
     text: "I won't make it a thing. Thanks for telling me.",
     nextNodeId: "xander_closer",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 1,
   }),
   reply({
@@ -648,7 +640,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_after_stay",
     text: "Xander. It suits you.",
     nextNodeId: "xander_closer",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -664,7 +656,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_closer",
     text: "I'll come find you.",
     nextNodeId: "xander_see_you",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     continuesConversation: true,
     sortOrder: 0,
   }),
@@ -673,7 +665,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander_closer",
     text: "I should see who else is on this pond. Don't start a fight about it.",
     nextNodeId: "xander_see_you",
-    friendlinessDelta: 2,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -714,7 +706,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_hello",
     text: "I'm glad you did.",
     nextNodeId: "xander2_since",
-    friendlinessDelta: 16,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -722,7 +714,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_hello",
     text: "Caught you looking.",
     nextNodeId: "xander2_since",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 1,
   }),
   reply({
@@ -730,7 +722,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_since",
     text: "Then I won't ask. I'm just glad you're okay.",
     nextNodeId: "xander2_sam_shows",
-    friendlinessDelta: 18,
+    friendlinessDelta: 16,
     sortOrder: 0,
   }),
   reply({
@@ -738,7 +730,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_since",
     text: "Loud how? What happened?",
     nextNodeId: "xander2_pressed",
-    friendlinessDelta: -4,
+    friendlinessDelta: -10,
     sortOrder: 1,
   }),
   reply({
@@ -746,7 +738,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_since",
     text: "I'd like to hear it, if you'll let me.",
     nextNodeId: "xander2_detail",
-    friendlinessDelta: 14,
+    friendlinessDelta: 10,
     requiredTier: "friend",
     minFriendliness: 25,
     sortOrder: 2,
@@ -756,7 +748,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_pressed",
     text: "Okay. I'll drop it.",
     nextNodeId: "xander2_sam_shows",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 0,
   }),
   reply({
@@ -764,7 +756,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_pressed",
     text: "Was it about me?",
     nextNodeId: "xander2_sam_shows",
-    friendlinessDelta: 2,
+    friendlinessDelta: 0,
     sortOrder: 1,
   }),
   reply({
@@ -772,7 +764,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_detail",
     text: "I'm something you want?",
     nextNodeId: "xander2_sam_shows",
-    friendlinessDelta: 16,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -796,7 +788,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_sam_shows",
     text: "Tell Sam to stop looking at you like that.",
     nextNodeId: "xander2_after_sam",
-    friendlinessDelta: 6,
+    friendlinessDelta: 4,
     sortOrder: 1,
   }),
   reply({
@@ -804,7 +796,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_after_sam",
     text: "This side's the one I picked.",
     nextNodeId: "xander2_closer",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -829,7 +821,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander2_closer",
     text: "I should check on the others. Don't take it as leaving.",
     nextNodeId: "xander2_see_you",
-    friendlinessDelta: 4,
+    friendlinessDelta: 0,
     sortOrder: 1,
   }),
   reply({
@@ -854,7 +846,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander3_return",
     text: "I like this pattern.",
     nextNodeId: "xander3_hello",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -894,7 +886,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander3_bike",
     text: "After the last time you got taken in?",
     nextNodeId: "xander3_no_story",
-    friendlinessDelta: 2,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -902,7 +894,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander3_bike",
     text: "You can tell me what happened. I can hold it.",
     nextNodeId: "xander3_story",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     requiredTier: "friend",
     minFriendliness: 35,
     sortOrder: 2,
@@ -912,7 +904,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander3_story",
     text: "I trust you with me. That's the point.",
     nextNodeId: "xander3_invite",
-    friendlinessDelta: 20,
+    friendlinessDelta: 18,
     sortOrder: 0,
   }),
   reply({
@@ -920,7 +912,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander3_story",
     text: "You don't have to apologize for surviving it.",
     nextNodeId: "xander3_invite",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 1,
   }),
   reply({
@@ -942,9 +934,9 @@ export const xanderOptions: DialogueOption[] = [
   reply({
     id: "opt_x3_hop",
     nodeId: "xander3_invite",
-    text: "I'll hop. Lose the audience with me.",
+    text: "Let's play something. Lose the audience with me.",
     nextNodeId: "xander3_after_hop",
-    friendlinessDelta: 20,
+    friendlinessDelta: 16,
     minigameId: "bullet_hell",
     sortOrder: 0,
   }),
@@ -1006,7 +998,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander3_closer",
     text: "I need to see the others before the light changes.",
     nextNodeId: "xander3_see_you",
-    friendlinessDelta: 2,
+    friendlinessDelta: 0,
     sortOrder: 1,
   }),
   reply({
@@ -1031,7 +1023,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander4_edge",
     text: "Get behind him.",
     nextNodeId: "xander4_stand",
-    friendlinessDelta: 12,
+    friendlinessDelta: 8,
     sortOrder: 0,
   }),
   reply({
@@ -1057,7 +1049,7 @@ export const xanderOptions: DialogueOption[] = [
     nodeId: "xander4_stand",
     text: "Please don't let this turn into a fight.",
     nextNodeId: "xander4_ending_bad",
-    friendlinessDelta: 4,
+    friendlinessDelta: -12,
     sortOrder: 1,
   }),
   reply({
@@ -1079,3 +1071,26 @@ export const xanderOptions: DialogueOption[] = [
     sortOrder: 0,
   }),
 ];
+
+/** First launch is Badboy Barrage. Later ids stay bullet_hell; the client picks the random pool after that win. */
+export const xanderOptions: DialogueOption[] = attachMinigameChoices(
+  xanderOptionsBase,
+  "bullet_hell",
+  [
+    { nodeId: "xander_deep_end_meet", id: "opt_mg_x_meet", text: "I'll dodge. Keep your eyes on me." },
+    { nodeId: "xander_reputation", id: "opt_mg_x_reputation", text: "Let's play something." },
+    { nodeId: "xander_detail", id: "opt_mg_x_detail", text: "I'll take the challenge." },
+    { nodeId: "xander_ryan_shows", id: "opt_mg_x_ryan", text: "How about a game?" },
+    { nodeId: "xander_after_hop", id: "opt_mg_x_after", text: "I'll play, if you will." },
+    { nodeId: "xander_closer", id: "opt_mg_x_closer", text: "Make it a game. I'm in." },
+    { nodeId: "xander2_hello", id: "opt_mg_x2_hello", text: "I'll take you on." },
+    { nodeId: "xander2_pressed", id: "opt_mg_x2_pressed", text: "A game, then. I'm ready." },
+    { nodeId: "xander2_sam_shows", id: "opt_mg_x2_sam", text: "Let's make a game of it." },
+    { nodeId: "xander2_closer", id: "opt_mg_x2_closer", text: "Let's play something." },
+    { nodeId: "xander3_hello", id: "opt_mg_x3_hello", text: "I'll take the challenge." },
+    { nodeId: "xander3_story", id: "opt_mg_x3_story", text: "How about a game?" },
+    { nodeId: "xander3_after_stay", id: "opt_mg_x3_stay", text: "I'll play, if you will." },
+    { nodeId: "xander4_edge", id: "opt_mg_x4_edge", text: "Make it a game. I'm in." },
+    { nodeId: "xander4_fight", id: "opt_mg_x4_fight", text: "I'll take you on." },
+  ]
+);

@@ -143,25 +143,112 @@ export function readBookmarks(value: unknown): ConversationBookmarks {
   return bookmarks;
 }
 
+export type BookmarkNodeSnap = {
+  id: string;
+  characterId: string;
+  conversationId: string | null;
+  isEnding: boolean;
+  endingType: EndingType;
+};
+
+export type BookmarkOptionSnap = {
+  nodeId: string;
+  nextNodeId: string;
+  continuesConversation: boolean;
+  sortOrder: number;
+};
+
+export type BookmarkGraph = {
+  nodeById: ReadonlyMap<string, BookmarkNodeSnap>;
+  optionsByNodeId: ReadonlyMap<string, readonly BookmarkOptionSnap[]>;
+};
+
+export function bookmarkGraph(
+  nodes: readonly BookmarkNodeSnap[],
+  options: readonly BookmarkOptionSnap[]
+): BookmarkGraph {
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const optionsByNodeId = new Map<string, BookmarkOptionSnap[]>();
+  const ordered = [...options].sort((a, b) => a.sortOrder - b.sortOrder);
+  for (const option of ordered) {
+    const list = optionsByNodeId.get(option.nodeId);
+    if (list) list.push(option);
+    else optionsByNodeId.set(option.nodeId, [option]);
+  }
+  return { nodeById, optionsByNodeId };
+}
+
+type DuckPlace = {
+  nodeId: string;
+  characterId: string;
+  conversationId: string | null;
+  exchangeCount: number;
+  consecutiveConversations: number;
+};
+
+/**
+ * A visit-ending line offers "keep talking" into the next real conversation and a shore exit.
+ * Remember the next line instead of that choice. A continue into an ending stays put,
+ * so the player still has to choose. The streak matches advanceConversation for that hop
+ * and is not pushed any further.
+ */
+function placePastVisitExit(place: DuckPlace, graph: BookmarkGraph | undefined): DuckPlace {
+  if (!graph || place.nodeId === START_NODE_ID) return place;
+  const savedNode = graph.nodeById.get(place.nodeId);
+  if (savedNode && savedNode.characterId !== place.characterId) return place;
+  const currentConversationId = savedNode ? savedNode.conversationId : place.conversationId;
+  const options = graph.optionsByNodeId.get(place.nodeId);
+  if (!options) return place;
+
+  let continuation: BookmarkNodeSnap | undefined;
+  for (const option of options) {
+    if (!option.continuesConversation) continue;
+    const next = graph.nodeById.get(option.nextNodeId);
+    if (!next) continue;
+    if (next.isEnding) return place;
+    if (next.id === START_NODE_ID || next.conversationId === null) continue;
+    if (next.characterId !== place.characterId) continue;
+    if (next.conversationId === currentConversationId) continue;
+    if (!continuation) continuation = next;
+  }
+  if (!continuation || continuation.id === place.nodeId) return place;
+
+  const moved = advanceConversation({
+    exchangeCount: place.exchangeCount,
+    consecutiveConversations: place.consecutiveConversations,
+    endingType: "bad",
+    currentConversationId,
+    currentCharacterId: place.characterId,
+    nextConversationId: continuation.conversationId,
+    nextCharacterId: continuation.characterId,
+    nextIsEnding: false,
+    nextEndingType: continuation.endingType,
+  });
+
+  return {
+    ...place,
+    nodeId: continuation.id,
+    conversationId: continuation.conversationId,
+    exchangeCount: 0,
+    consecutiveConversations: moved.consecutiveConversations,
+  };
+}
+
 /** Remember a duck's place. The shore hub is not a place, even though Sam owns that node. */
 export function rememberDuckPlace(
   bookmarks: ConversationBookmarks,
-  place: {
-    nodeId: string;
-    characterId: string;
-    conversationId: string | null;
-    exchangeCount: number;
-    consecutiveConversations: number;
-  }
+  place: DuckPlace,
+  graph?: BookmarkGraph
 ): ConversationBookmarks {
-  if (place.nodeId === START_NODE_ID) return bookmarks;
+  const saved = placePastVisitExit(place, graph);
+  if (saved.nodeId === START_NODE_ID) return bookmarks;
   return {
     ...bookmarks,
-    [place.characterId]: {
-      nodeId: place.nodeId,
-      conversationId: place.conversationId,
-      exchangeCount: place.exchangeCount,
-      consecutiveConversations: place.consecutiveConversations,
+    [saved.characterId]: {
+      nodeId: saved.nodeId,
+      conversationId: saved.conversationId,
+      exchangeCount: saved.exchangeCount,
+      consecutiveConversations: saved.consecutiveConversations,
     },
   };
 }
@@ -176,7 +263,8 @@ type ChoiceNodeSnap = {
 
 /**
  * Progress after one chosen reply.
- * Leaving a duck line stores that line for them. A shore choice reopens the saved line
+ * Leaving a duck line stores that line for them. Leaving a visit exit for the shore stores
+ * the next conversation instead of the choice. A shore choice reopens the saved line
  * for the duck that option introduces, with the counters from when the player left.
  * Resuming does not run the streak forward. A missing saved node uses the scripted line.
  */
@@ -187,6 +275,8 @@ export function applyChoiceProgress(input: {
   scriptedNext: ChoiceNodeSnap;
   /** Loaded saved node, when this choice leaves the shore and that node still exists. */
   resumeNode: ChoiceNodeSnap | null;
+  /** Lines and replies used to store the next conversation instead of a visit exit. */
+  bookmarkGraph?: BookmarkGraph;
   progress: {
     exchangeCount: number;
     consecutiveConversations: number;
@@ -205,13 +295,17 @@ export function applyChoiceProgress(input: {
 } {
   let bookmarks = input.progress.bookmarks;
   if (input.fromNodeId !== START_NODE_ID) {
-    bookmarks = rememberDuckPlace(bookmarks, {
-      nodeId: input.fromNodeId,
-      characterId: input.fromCharacterId,
-      conversationId: input.fromConversationId,
-      exchangeCount: input.progress.exchangeCount,
-      consecutiveConversations: input.progress.consecutiveConversations,
-    });
+    bookmarks = rememberDuckPlace(
+      bookmarks,
+      {
+        nodeId: input.fromNodeId,
+        characterId: input.fromCharacterId,
+        conversationId: input.fromConversationId,
+        exchangeCount: input.progress.exchangeCount,
+        consecutiveConversations: input.progress.consecutiveConversations,
+      },
+      input.bookmarkGraph
+    );
   }
 
   const saved =
@@ -257,13 +351,17 @@ export function applyChoiceProgress(input: {
   }
 
   if (currentNodeId !== START_NODE_ID) {
-    bookmarks = rememberDuckPlace(bookmarks, {
-      nodeId: currentNodeId,
-      characterId,
-      conversationId,
-      exchangeCount,
-      consecutiveConversations,
-    });
+    bookmarks = rememberDuckPlace(
+      bookmarks,
+      {
+        nodeId: currentNodeId,
+        characterId,
+        conversationId,
+        exchangeCount,
+        consecutiveConversations,
+      },
+      input.bookmarkGraph
+    );
   }
 
   return {

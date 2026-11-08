@@ -4,9 +4,10 @@ import { backgroundSrc } from "../assets/manifest";
 const FALLBACK =
   "radial-gradient(ellipse at 50% 30%, #3d8a9a 0%, #1a4a5a 45%, #0f2a35 100%)";
 
-export function Background() {
-  const [failed, setFailed] = useState(false);
-  const src = backgroundSrc();
+export function Background({ backgroundKey }: { backgroundKey?: string }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const src = backgroundSrc(backgroundKey);
+  const failed = failedSrc === src;
 
   return (
     <div className="absolute inset-0 overflow-hidden" style={{ background: FALLBACK }}>
@@ -16,7 +17,7 @@ export function Background() {
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           draggable={false}
-          onError={() => setFailed(true)}
+          onError={() => setFailedSrc(src)}
         />
       )}
       {failed && (

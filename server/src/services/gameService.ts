@@ -9,6 +9,7 @@ import {
   SAMPLE_CHARACTER_ID,
   START_NODE_ID,
   applyChoiceProgress,
+  bookmarkGraph,
   getFriendlinessTier,
   hasClearedMinigame,
   minigameFlag,
@@ -16,6 +17,7 @@ import {
   optionIsAvailable,
   readBookmarks,
   rememberDuckPlace,
+  type BookmarkGraph,
   type AiDialogueOption,
   type ChoiceResult,
   type DialogueBundle,
@@ -32,6 +34,31 @@ import { getDb, isUsingDatabase, memoryStore, schema } from "../db";
 
 function asEnding(value: string | null | undefined): EndingType {
   return value === "good" ? "good" : "bad";
+}
+
+async function loadBookmarkGraph(): Promise<BookmarkGraph> {
+  const db = getDb()!;
+  const nodeRows = await db
+    .select({
+      id: schema.dialogueNodes.id,
+      characterId: schema.dialogueNodes.characterId,
+      conversationId: schema.dialogueNodes.conversationId,
+      isEnding: schema.dialogueNodes.isEnding,
+      endingType: schema.dialogueNodes.endingType,
+    })
+    .from(schema.dialogueNodes);
+  const optionRows = await db
+    .select({
+      nodeId: schema.dialogueOptions.nodeId,
+      nextNodeId: schema.dialogueOptions.nextNodeId,
+      continuesConversation: schema.dialogueOptions.continuesConversation,
+      sortOrder: schema.dialogueOptions.sortOrder,
+    })
+    .from(schema.dialogueOptions);
+  return bookmarkGraph(
+    nodeRows.map((row) => ({ ...row, endingType: asEnding(row.endingType) })),
+    optionRows
+  );
 }
 
 function toNode(row: typeof schema.dialogueNodes.$inferSelect): DialogueNode {
@@ -470,6 +497,7 @@ export async function applyChoice(
     fromConversationId: node.conversationId,
     scriptedNext: nextNode,
     resumeNode,
+    bookmarkGraph: await loadBookmarkGraph(),
     progress: {
       exchangeCount: progressRow?.exchangeCount ?? 0,
       consecutiveConversations: progressRow?.consecutiveConversations ?? 0,
@@ -567,13 +595,17 @@ export async function saveProgress(
   const conversationId = node?.conversationId ?? existing?.conversationId ?? null;
   let bookmarks = readBookmarks(existing?.bookmarks);
   if (node && node.id !== START_NODE_ID) {
-    bookmarks = rememberDuckPlace(bookmarks, {
-      nodeId: node.id,
-      characterId: node.characterId,
-      conversationId: node.conversationId,
-      exchangeCount: existing?.exchangeCount ?? 0,
-      consecutiveConversations: existing?.consecutiveConversations ?? 0,
-    });
+    bookmarks = rememberDuckPlace(
+      bookmarks,
+      {
+        nodeId: node.id,
+        characterId: node.characterId,
+        conversationId: node.conversationId,
+        exchangeCount: existing?.exchangeCount ?? 0,
+        consecutiveConversations: existing?.consecutiveConversations ?? 0,
+      },
+      await loadBookmarkGraph()
+    );
   }
 
   await db

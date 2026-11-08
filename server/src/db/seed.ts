@@ -14,7 +14,9 @@ import {
   DUCK_CHARACTER_IDS,
   SAMPLE_CHARACTER_ID,
   START_NODE_ID,
+  bookmarkGraph,
 } from "@duck-dating/shared";
+import { rewriteExitBookmarks } from "./rewriteExitBookmarks";
 
 async function seed() {
   const mode = await initDb();
@@ -220,8 +222,9 @@ async function seed() {
     })
     .onConflictDoNothing();
 
+  const rewritten = await rewriteExitBookmarks(db, bookmarkGraph(nodes, options));
   console.log(
-    `Seed complete (${nodes.length} lines, ${options.length} replies, shore included).`
+    `Seed complete (${nodes.length} lines, ${options.length} replies, shore included, ${rewritten} visit-exit bookmark saves moved).`
   );
   await closeDb();
 }

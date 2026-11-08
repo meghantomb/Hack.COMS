@@ -1,106 +1,24 @@
 # What the Duck?
+### By Katelyn Clark, Meghan Tomback, Alexandra Jean
+### For Hack.COMS 2026 
 
-Minimal browser duck dating sim (DDLC-inspired vertical slice). Four ducks (`jock`, `breadluvr`, `badboy`, `artist`) with left/right PNG slots; per-duck signature minigames plus a random pool; love meters; friendship / romance endings.
+## Inspiration
+What happens when a freshly escaped piece of bread finds itself in a pond full of eligible ducks? Apparently, a dating sim where you may or may not get eaten. _What the Duck?_  started as the first joke idea thrown out .. and unfortunately was brought to creation. Inspired by games like _Date Everything!_ and _Doki Doki Literature Club!_, WTD lets you play as a delicious piece of bread while you build relationships with the four local ducks, each with their own special personality. In _Episode - Choose Your Story_ fashion, the best dialogue options are locked behind ~~a paywall~~ eight unique minigames. Will you romance your way to freedom and companionship? Or end up as a snack for some hungry ducks?
 
-## Art (PNG slots)
+## What it does
+Talk your way through branching conversations with four dateable ducks while managing love meters that decide whether you earn friendship, romance, or just the privilege of being lunch. Better dialogue options unlock by beating eight minigames: four signature games tied to each duck (Pixel Paint, Bullet Hell, Bread Snake, and Slide Puzzle) plus a random pool (Simon Quacks, Flappy Duck, Rhythm Quacker, and Duckling Dash).
 
-Drop PNGs into `client/public/assets/` — see that folder’s `README.md`. Path wiring lives in `client/src/assets/manifest.ts` (no code edits needed if filenames match).
+## How we built it
+A TypeScript monorepo with a React + Vite + Tailwind client, an Express API, and a shared package for dialogue types, friendliness rules, and minigame metadata. Game state and story are stored on Tiger Data with Postgres, with an in-memory fallback. Minigames are wired through a registry so each duck route can restrict choices behind their win conditions. Optional Grok (xAI) support can batch-generate additional dialogue offline without live gameplay having to depend on the model. 
 
-## Stack
+## Challenges we ran into
+The tech stack wiring was pretty complicated, and all three of us navigating different parts of the codebase at the same time led to a lot of merge conflicts and minor crash outs. Getting the frontend, backend, and database to cooperate was its own minigame, except nobody was having fun and there was no choice to lose. We also had to figure out how to fit eight minigames, four branching storylines, and a concerning amount of duck lore into 25 hours.
 
-- **client/** — React, TypeScript, Vite, Tailwind, Zustand (canvas minigames)
-- **server/** — Node, Express, TypeScript, Drizzle ORM (TigerData / PostgreSQL)
-- **shared/** — Shared types and friendliness helpers
+## Accomplishments that we're proud of
+We actually followed through on the joke :'). We're also really proud of all the very human aspects of the project, like the hand-drawn characters, backgrounds, and bad animations, as well as the character writing (each duck has their own backstory, habits, etc.) and story flow. Somehow, our incredibly unserious idea turned into an actual playable game with four ducks that we are now emotionally attached to .. some more than others (I <3 Ryan).
 
-## Quick start (no DB / no API keys)
+## What we learned
+This was our first time working with Grok bots, so we learned a lot about setting up separate character-specific bots and giving them enough context to generate dialogue that actually fits each duck's personality. Most importantly, we learned that making a dating simulator is significantly harder when you also have to worry about the player getting eaten.
 
-```bash
-cp .env.example .env
-npm install
-npm run build --workspace=shared
-npm run dev:server   # memory mode when DATABASE_URL is unset
-npm run dev:client   # http://localhost:5173 (proxies /api → :3001)
-```
-
-Optional root script: `npm run dev` starts both (backgrounds the server).
-
-## With PostgreSQL (TigerData-compatible)
-
-1. Set `DATABASE_URL` in `.env`.
-2. `npm run db:migrate`
-3. `npm run db:seed`
-4. Restart the server (uses Postgres instead of memory).
-
-## Grok (xAI) batch dialogue
-
-Set `XAI_API_KEY` (optional `XAI_API_BASE`, `XAI_MODEL`). Without a key, `POST /api/generate/dialogue` uses a mock generator.
-
-AI is **batch-only** (admin-style endpoint). Gameplay never calls Grok.
-
-Example:
-
-```bash
-curl -s http://localhost:3001/api/generate/dialogue \
-  -H 'Content-Type: application/json' \
-  -d '{"characterId":"breadluvr","sceneContext":"Morning at the pond","tier":"friend","count":3}'
-```
-
-Pass `"persist":true,"nodeId":"small_talk"` to insert validated options as flavor variations (same next-node as existing branches).
-
-Duck art filenames: `jock_left.png` / `jock_right.png` (same pattern for `breadluvr`, `badboy`, `artist`) in `client/public/assets/ducks/`.
-
-## Scripts
-
-| Script | Description |
-|--------|-------------|
-| `npm run dev:client` / `dev:server` | Local Vite / API |
-| `npm run build` / `build:vercel` | Build shared → server → client |
-| `npm run typecheck` | TypeScript across workspaces |
-| `npm run db:migrate` / `db:seed` | Schema + sample story (needs `DATABASE_URL`) |
-
-Secrets stay server-side. The client only uses `VITE_API_URL` (optional; leave unset for Vite proxy locally and for same-origin production).
-
-## Deploy on Vercel (single project)
-
-One Vercel project serves the Vite static build and routes `/api/*` to Express (`api/index.js` → `server/dist/app.js`). Same origin — no CORS or `VITE_API_URL` needed in production.
-
-### 1. Push this repo to GitHub
-
-### 2. Import the repo on Vercel
-
-- [vercel.com/new](https://vercel.com/new) → import `Hack.COMS`
-- **Root Directory:** repository root (`.`), not `client/`
-- Leave Framework / Build / Output alone if `vercel.json` is detected; it already sets:
-  - Install: `npm install`
-  - Build: `npm run build:vercel`
-  - Output: `client/dist`
-
-### 3. Environment variables (Project → Settings → Environment Variables)
-
-| Name | Required | Notes |
-|------|----------|--------|
-| `DATABASE_URL` | Strongly recommended | Without it, progress uses memory and resets on cold starts |
-| `XAI_API_KEY` | Optional | Only for `POST /api/generate/dialogue`; gameplay works without it |
-| `XAI_API_BASE` / `XAI_MODEL` | Optional | Defaults match `.env.example` |
-| `VITE_API_URL` | **Leave unset** | Same-origin `/api` on the deployed host |
-
-Apply to Production (and Preview if you use DB there too).
-
-### 4. Database (if using Postgres)
-
-Migrate/seed against the same `DATABASE_URL` before or right after the first deploy:
-
-```bash
-# with DATABASE_URL in your local .env (or exported)
-npm run db:migrate
-npm run db:seed
-```
-
-### 5. Deploy
-
-Click **Deploy** (or push to the connected branch). After it succeeds:
-
-- Game: `https://<project>.vercel.app`
-- Health: `https://<project>.vercel.app/api/health`
-
-Local workflow stays the same (`dev:server` + `dev:client`). Do not run `app.listen` on Vercel — the serverless entry only exports the Express app.
+## What's next for What the Duck?
+More dialogue, more endings, more minigames, and potentially more questionable romantic interests. We'd love to expand the storylines, add more character interactions, polish the art and animations, and make the relationship system even more chaotic. Maybe even give our poor piece of bread a chance at a happier ending. Or not. The ducks are pretty hungry.

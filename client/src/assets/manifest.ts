@@ -12,6 +12,7 @@
  *
  * Background:
  *   backgrounds/pond.png
+ *   backgrounds/pond_sunset.png
  *
  * Intro (new game only):
  *   public/intro/bread_intro_video.mp4  →  /intro/bread_intro_video.mp4
@@ -35,9 +36,17 @@ export type Facing = "left" | "right";
 
 const asset = (path: string) => `/assets/${path}`;
 
-/** Single background slot. */
-export function backgroundSrc(): string {
-  return asset("backgrounds/pond.png");
+/** Dialogue `backgroundKey` → file under `public/assets/`. Unknown keys stay on the day pond. */
+const BACKGROUNDS: Record<string, string> = {
+  pond: "backgrounds/pond.png",
+  pond_sunset: "backgrounds/pond_sunset.png",
+};
+
+/** Scene background. `pond_sunset` is the only key that leaves the day pond. */
+export function backgroundSrc(backgroundKey?: string): string {
+  const file =
+    (backgroundKey && BACKGROUNDS[backgroundKey]) || "backgrounds/pond.png";
+  return asset(file);
 }
 
 /** New-game intro cutscene (lives in public/intro/, not public/assets/). */

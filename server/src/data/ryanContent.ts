@@ -1,4 +1,5 @@
 import type { Conversation, DialogueNode, DialogueOption, Minigame } from "@duck-dating/shared";
+import { attachMinigameChoices } from "./attachMinigames";
 
 export const reedRaceMinigame: Minigame = {
   id: "slide_puzzle",
@@ -439,7 +440,7 @@ export const ryanNodes: DialogueNode[] = [
   }),
 ];
 
-export const ryanOptions: DialogueOption[] = [
+const ryanOptionsBase: DialogueOption[] = [
   reply({
     id: "ryan_opt_roll_closer",
     nodeId: "ryan_pond_meet",
@@ -461,7 +462,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_hello",
     text: "I just escaped a kitchen. A race sounds better than being dinner.",
     nextNodeId: "ryan_small_talk",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -469,7 +470,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_hello",
     text: "Keep up? You haven't seen me roll yet.",
     nextNodeId: "ryan_small_talk",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 1,
   }),
   reply({
@@ -477,7 +478,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_hello",
     text: "I came here to hide, not to compete.",
     nextNodeId: "ryan_small_talk",
-    friendlinessDelta: 2,
+    friendlinessDelta: -2,
     sortOrder: 2,
   }),
   reply({
@@ -485,41 +486,33 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_small_talk",
     text: "A cut, huh? Then I'll try not to smell too delicious.",
     nextNodeId: "ryan_invite_race",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
-  }),
-  reply({
-    id: "ryan_opt_not_protein",
-    nodeId: "ryan_small_talk",
-    text: "Racing is not protein. But I'll pretend it is if you stop staring.",
-    nextNodeId: "ryan_invite_race",
-    friendlinessDelta: 8,
-    sortOrder: 1,
   }),
   reply({
     id: "ryan_opt_no_meal_plan",
     nodeId: "ryan_small_talk",
     text: "Please do not put me in a meal plan.",
     nextNodeId: "ryan_invite_race",
-    friendlinessDelta: -2,
-    sortOrder: 2,
+    friendlinessDelta: -6,
+    sortOrder: 1,
   }),
   reply({
     id: "ryan_opt_no_perform",
     nodeId: "ryan_small_talk",
     text: "You don't have to perform \"normal\" for me. Just be here.",
     nextNodeId: "ryan_invite_race",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     requiredTier: "acquaintance",
     minFriendliness: 20,
-    sortOrder: 3,
+    sortOrder: 2,
   }),
   reply({
     id: "ryan_opt_race_yes",
     nodeId: "ryan_invite_race",
-    text: "I'll race. Don't you dare go easy on me.",
+    text: "I'll take the challenge. Don't go easy.",
     nextNodeId: "ryan_after_win",
-    friendlinessDelta: 20,
+    friendlinessDelta: 16,
     minigameId: "slide_puzzle",
     sortOrder: 0,
   }),
@@ -536,7 +529,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_after_win",
     text: "You didn't let me have that last bend. Don't start lying now.",
     nextNodeId: "ryan_deeper",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -544,7 +537,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_after_win",
     text: "Your wings are shaking. Adrenaline. Sure.",
     nextNodeId: "ryan_deeper",
-    friendlinessDelta: 6,
+    friendlinessDelta: 4,
     sortOrder: 1,
   }),
   reply({
@@ -552,7 +545,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_after_decline",
     text: "You don't have to run extra laps for my sake.",
     nextNodeId: "ryan_deeper",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 0,
   }),
   reply({
@@ -560,7 +553,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_after_decline",
     text: "Sorry. I just got here. Everything feels like a trap.",
     nextNodeId: "ryan_deeper",
-    friendlinessDelta: 4,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -568,7 +561,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_deeper",
     text: "Yeah. You can stop smiling. I'll still be here.",
     nextNodeId: "ryan_wrap_warm",
-    friendlinessDelta: 15,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -576,7 +569,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_deeper",
     text: "I liked the duck who lost honestly more than the one who cheers on cue.",
     nextNodeId: "ryan_wrap_warm",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     requiredTier: "acquaintance",
     minFriendliness: 20,
     requiresMinigameWin: true,
@@ -587,7 +580,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_deeper",
     text: "I can hang. I'm not signing up to be your whole crowd.",
     nextNodeId: "ryan_wrap_guarded",
-    friendlinessDelta: 2,
+    friendlinessDelta: -2,
     sortOrder: 2,
   }),
   ...visitExit("ryan_wrap_warm", "ryan_train_arrive", "Meet him for training."),
@@ -613,7 +606,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_hello",
     text: "I came back. Tell me the plan.",
     nextNodeId: "ryan_train_talk",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -621,7 +614,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_hello",
     text: "You don't have to act cool. I'm already here.",
     nextNodeId: "ryan_train_talk",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 1,
   }),
   reply({
@@ -629,7 +622,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_hello",
     text: "I only came to watch.",
     nextNodeId: "ryan_train_talk",
-    friendlinessDelta: 4,
+    friendlinessDelta: -2,
     sortOrder: 2,
   }),
   reply({
@@ -637,7 +630,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_talk",
     text: "You're doing better than you think. I can stay and train.",
     nextNodeId: "ryan_train_invite",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -645,7 +638,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_talk",
     text: "If you cry during extra reps, I'll pretend I didn't see.",
     nextNodeId: "ryan_train_invite",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 1,
   }),
   reply({
@@ -653,7 +646,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_talk",
     text: "Please don't call me a snack during warmup.",
     nextNodeId: "ryan_train_invite",
-    friendlinessDelta: -2,
+    friendlinessDelta: -6,
     sortOrder: 2,
   }),
   reply({
@@ -661,7 +654,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_talk",
     text: "I showed up for you, not the plan.",
     nextNodeId: "ryan_train_invite",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     requiredTier: "acquaintance",
     minFriendliness: 20,
     sortOrder: 3,
@@ -669,9 +662,9 @@ export const ryanOptions: DialogueOption[] = [
   reply({
     id: "ryan_opt_train_race_yes",
     nodeId: "ryan_train_invite",
-    text: "I'll race. Stay where I can see you.",
+    text: "Let's play something. Stay where I can see you.",
     nextNodeId: "ryan_train_win",
-    friendlinessDelta: 20,
+    friendlinessDelta: 16,
     minigameId: "slide_puzzle",
     sortOrder: 0,
   }),
@@ -688,7 +681,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_win",
     text: "I like being the one you trained with.",
     nextNodeId: "ryan_train_deeper",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -696,7 +689,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_win",
     text: "Your \"it was nothing\" speech needs work.",
     nextNodeId: "ryan_train_deeper",
-    friendlinessDelta: 6,
+    friendlinessDelta: 4,
     sortOrder: 1,
   }),
   reply({
@@ -704,7 +697,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_decline",
     text: "You don't have to double your set for me.",
     nextNodeId: "ryan_train_deeper",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     sortOrder: 0,
   }),
   reply({
@@ -712,7 +705,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_decline",
     text: "Sorry. The race still looks like a lot.",
     nextNodeId: "ryan_train_deeper",
-    friendlinessDelta: 4,
+    friendlinessDelta: 2,
     sortOrder: 1,
   }),
   reply({
@@ -720,7 +713,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_deeper",
     text: "I'd show up even if you stopped grinning.",
     nextNodeId: "ryan_train_warm",
-    friendlinessDelta: 15,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -728,7 +721,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_deeper",
     text: "I like you between the laps, not just during them.",
     nextNodeId: "ryan_train_warm",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     requiredTier: "acquaintance",
     minFriendliness: 20,
     requiresMinigameWin: true,
@@ -739,7 +732,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_train_deeper",
     text: "I can train with you. I'm not your whole answer.",
     nextNodeId: "ryan_train_guarded",
-    friendlinessDelta: 2,
+    friendlinessDelta: -2,
     sortOrder: 2,
   }),
   ...visitExit("ryan_train_warm", "ryan_crowd_arrive", "Come back when he saves you a seat."),
@@ -765,7 +758,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_hello",
     text: "It looks perfect. You can relax now.",
     nextNodeId: "ryan_crowd_xander",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -773,7 +766,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_hello",
     text: "Friend is a good word. I'll take it.",
     nextNodeId: "ryan_crowd_xander",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 1,
   }),
   reply({
@@ -789,7 +782,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_xander",
     text: "I'm not lunch. Don't talk about me like that.",
     nextNodeId: "ryan_crowd_smooth",
-    friendlinessDelta: 4,
+    friendlinessDelta: -4,
     sortOrder: 1,
   }),
   reply({
@@ -797,7 +790,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_smooth",
     text: "Tell him the seat was yours. Stay put.",
     nextNodeId: "ryan_crowd_defended",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -805,7 +798,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_smooth",
     text: "Let him move. It isn't worth a fight.",
     nextNodeId: "ryan_crowd_moved",
-    friendlinessDelta: 2,
+    friendlinessDelta: -2,
     sortOrder: 1,
   }),
   reply({
@@ -813,7 +806,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_defended",
     text: "You don't have to give everything away to keep the peace.",
     nextNodeId: "ryan_crowd_deeper",
-    friendlinessDelta: 16,
+    friendlinessDelta: 14,
     sortOrder: 0,
   }),
   reply({
@@ -821,7 +814,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_defended",
     text: "I know you liked that spot. I did too.",
     nextNodeId: "ryan_crowd_deeper",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 1,
   }),
   reply({
@@ -829,7 +822,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_moved",
     text: "You're allowed to want the seat you saved.",
     nextNodeId: "ryan_crowd_deeper",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 0,
   }),
   reply({
@@ -837,7 +830,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_moved",
     text: "You don't look like this is great.",
     nextNodeId: "ryan_crowd_deeper",
-    friendlinessDelta: 6,
+    friendlinessDelta: 4,
     sortOrder: 1,
   }),
   reply({
@@ -845,7 +838,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_deeper",
     text: "Stay in the good spot. I'll stay with you.",
     nextNodeId: "ryan_crowd_warm",
-    friendlinessDelta: 15,
+    friendlinessDelta: 12,
     sortOrder: 0,
   }),
   reply({
@@ -853,7 +846,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_crowd_deeper",
     text: "I care about you, not how happy you can make everyone else.",
     nextNodeId: "ryan_crowd_warm",
-    friendlinessDelta: 18,
+    friendlinessDelta: 14,
     requiredTier: "friend",
     minFriendliness: 40,
     requiresMinigameWin: true,
@@ -882,7 +875,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_final_arrive",
     text: "Tell him he can stop standing like that. You're not leaving.",
     nextNodeId: "ryan_final_hello",
-    friendlinessDelta: 12,
+    friendlinessDelta: 10,
     sortOrder: 1,
   }),
   reply({
@@ -890,7 +883,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_final_hello",
     text: "That's sweet. And a little bit of a dodge. Keep going.",
     nextNodeId: "ryan_final_ask",
-    friendlinessDelta: 10,
+    friendlinessDelta: 8,
     sortOrder: 0,
   }),
   reply({
@@ -898,7 +891,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_final_hello",
     text: "You want me on the team. Say what that actually means.",
     nextNodeId: "ryan_final_ask",
-    friendlinessDelta: 14,
+    friendlinessDelta: 12,
     sortOrder: 1,
   }),
   reply({
@@ -916,7 +909,7 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_final_ask",
     text: "I trust you. I'll take the job. I'm still not dinner.",
     nextNodeId: "ryan_ending_good",
-    friendlinessDelta: 8,
+    friendlinessDelta: 6,
     requiredTier: "friend",
     minFriendliness: 40,
     requiresMinigameWin: true,
@@ -927,7 +920,22 @@ export const ryanOptions: DialogueOption[] = [
     nodeId: "ryan_final_ask",
     text: "I don't want to be eaten. Not even as part of the team.",
     nextNodeId: "ryan_ending_bad",
-    friendlinessDelta: 2,
+    friendlinessDelta: -12,
     sortOrder: 2,
   }),
 ];
+
+/** First launch is Jock Slide. Later ids stay slide_puzzle; the client picks the random pool after that win. */
+export const ryanOptions: DialogueOption[] = attachMinigameChoices(ryanOptionsBase, "slide_puzzle", [
+  { nodeId: "ryan_pond_meet", id: "opt_mg_ryan_meet", text: "I'll take the slide. Get us unstuck." },
+  { nodeId: "ryan_small_talk", id: "opt_mg_ryan_talk", text: "Let's play something." },
+  { nodeId: "ryan_after_win", id: "opt_mg_ryan_after", text: "I'll take the challenge." },
+  { nodeId: "ryan_deeper", id: "opt_mg_ryan_deeper", text: "How about a game?" },
+  { nodeId: "ryan_train_hello", id: "opt_mg_ryan_train_hello", text: "I'll play, if you will." },
+  { nodeId: "ryan_train_decline", id: "opt_mg_ryan_train_decline", text: "Make it a game. I'm in." },
+  { nodeId: "ryan_crowd_arrive", id: "opt_mg_ryan_crowd", text: "I'll take you on." },
+  { nodeId: "ryan_crowd_xander", id: "opt_mg_ryan_crowd_x", text: "A game, then. I'm ready." },
+  { nodeId: "ryan_crowd_defended", id: "opt_mg_ryan_defended", text: "Let's make a game of it." },
+  { nodeId: "ryan_crowd_deeper", id: "opt_mg_ryan_crowd_deep", text: "Let's play something." },
+  { nodeId: "ryan_final_hello", id: "opt_mg_ryan_final", text: "I'll take the challenge." },
+]);

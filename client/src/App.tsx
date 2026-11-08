@@ -102,7 +102,7 @@ export default function App() {
     <>
       {music}
       <div className="relative h-full min-h-[100dvh] overflow-hidden">
-        <Background />
+        <Background backgroundKey={bundle.node.backgroundKey} />
 
         {/* Characters stay fixed behind UI; kept low in the frame. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[26%] z-10 pb-36 sm:top-[28%] sm:pb-44 lg:top-[24%] lg:pb-52 xl:pb-60">

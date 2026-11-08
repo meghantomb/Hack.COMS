@@ -9,6 +9,13 @@ export function EndingScreen() {
   if (!bundle) return null;
 
   const good = bundle.node.endingType === "good";
+  const goodTitle =
+    {
+      breadluvr: "Eaten, With Love",
+      jock: "Big Career Moves",
+      badboy: "Riding Off into the Sunset",
+      artist: "Make me your Muse",
+    }[bundle.node.characterId] ?? "Eaten, With Love";
 
   return (
     <div className="absolute inset-0 z-40 flex flex-col items-center justify-center px-6 text-center">
@@ -18,7 +25,7 @@ export function EndingScreen() {
           {good ? "Good Ending" : "Bad Ending"}
         </p>
         <h2 className="mt-3 font-display text-3xl text-white sm:text-4xl">
-          {good ? "Eaten, With Love" : "Just Dinner"}
+          {good ? goodTitle : "Just Dinner"}
         </h2>
         <p className="mt-4 font-story text-lg text-white/90">{bundle.node.text}</p>
         <p className="mt-2 font-display text-sm text-ui-cream">
