@@ -16,6 +16,10 @@
  * Intro (new game only):
  *   public/intro/bread_intro_video.mp4  →  /intro/bread_intro_video.mp4
  *
+ * Title screen:
+ *   assets/intro/title_background.png
+ *   assets/intro/title.png  (logo layered on top)
+ *
  * Staging: MC left / duck right — duck uses *_left, player faces toward the duck.
  */
 
@@ -34,6 +38,16 @@ export function backgroundSrc(): string {
 /** New-game intro cutscene (lives in public/intro/, not public/assets/). */
 export function introVideoSrc(): string {
   return "/intro/bread_intro_video.mp4";
+}
+
+/** Title screen full-bleed background. */
+export function titleBackgroundSrc(): string {
+  return asset("intro/title_background.png");
+}
+
+/** Title / logo PNG layered over the title background. */
+export function titleLogoSrc(): string {
+  return asset("intro/title.png");
 }
 
 /** Player on the left side of the screen → usually `right` (faces the duck). */

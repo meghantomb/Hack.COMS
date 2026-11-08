@@ -47,10 +47,12 @@ export function StageChrome({
   layout,
   meters,
   onRestart,
+  onSaveAndQuit,
 }: {
   layout: StageLayout;
   meters: LoveMeter[];
   onRestart: () => void;
+  onSaveAndQuit: () => void;
 }) {
   const left = layout.ducks.filter((duck) => duck.side === "left");
   const right = layout.ducks.filter((duck) => duck.side === "right");
@@ -60,13 +62,22 @@ export function StageChrome({
       <h1 className="font-display text-xl text-pond-foam drop-shadow sm:text-2xl">
         What the Duck?
       </h1>
-      <button
-        type="button"
-        onClick={onRestart}
-        className="mt-0.5 text-xs text-pond-light/70 underline hover:text-pond-foam"
-      >
-        Reset save
-      </button>
+      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <button
+          type="button"
+          onClick={onSaveAndQuit}
+          className="text-xs text-pond-sunset underline hover:text-pond-foam"
+        >
+          Save &amp; Title
+        </button>
+        <button
+          type="button"
+          onClick={onRestart}
+          className="text-xs text-pond-light/70 underline hover:text-pond-foam"
+        >
+          Reset save
+        </button>
+      </div>
     </div>
   );
 
