@@ -32,6 +32,8 @@ interface GameState {
   phase: GamePhase;
   bundle: DialogueBundle | null;
   pendingOption: DialogueOption | null;
+  /** Minigame choices failed this visit — stay greyed until the node changes. */
+  lockedMinigameOptionIds: string[];
   typedLength: number;
   error: string | null;
   canContinue: boolean;
@@ -42,7 +44,7 @@ interface GameState {
   finishIntro: () => Promise<void>;
   load: () => Promise<void>;
   selectOption: (option: DialogueOption) => Promise<void>;
-  completeMinigame: (won: boolean) => Promise<void>;
+  completeMinigame: (won: boolean, playedMinigameId?: string) => Promise<void>;
   cancelMinigame: () => void;
   setTypedLength: (n: number) => void;
   restart: () => Promise<void>;
@@ -60,6 +62,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   phase: "title",
   bundle: null,
   pendingOption: null,
+  lockedMinigameOptionIds: [],
   typedLength: 0,
   error: null,
   canContinue: false,
@@ -130,6 +133,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         phase: phaseForBundle(bundle),
         typedLength: 0,
         pendingOption: null,
+        lockedMinigameOptionIds: [],
         canContinue: bundle.node.id !== START_NODE_ID || bundle.node.isEnding,
       });
     } catch (e) {
@@ -141,6 +145,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   selectOption: async (option) => {
+    if (option.minigameId && get().lockedMinigameOptionIds.includes(option.id)) {
+      return;
+    }
     if (option.minigameId) {
       set({ pendingOption: option, phase: "minigame" });
       return;
@@ -156,6 +163,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         phase: phaseForBundle(result.bundle),
         typedLength: 0,
         pendingOption: null,
+        lockedMinigameOptionIds: [],
         error: null,
         canContinue: true,
       });
@@ -164,18 +172,30 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  completeMinigame: async (won) => {
+  completeMinigame: async (won, playedMinigameId) => {
     const option = get().pendingOption;
     if (!option) {
       set({ phase: "dialogue" });
       return;
     }
     if (!won) {
-      set({ pendingOption: null, phase: "dialogue" });
+      const locked = get().lockedMinigameOptionIds;
+      set({
+        pendingOption: null,
+        phase: "dialogue",
+        lockedMinigameOptionIds: locked.includes(option.id)
+          ? locked
+          : [...locked, option.id],
+      });
       return;
     }
     try {
-      const result = await postChoice(option.id, true, get().playerId);
+      const result = await postChoice(
+        option.id,
+        true,
+        get().playerId,
+        playedMinigameId
+      );
       if (!result.success || !result.bundle) {
         set({
           pendingOption: null,
@@ -189,6 +209,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         phase: phaseForBundle(result.bundle),
         typedLength: 0,
         pendingOption: null,
+        lockedMinigameOptionIds: [],
         error: null,
         canContinue: true,
       });
@@ -202,7 +223,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   cancelMinigame: () => {
-    set({ pendingOption: null, phase: "dialogue" });
+    const option = get().pendingOption;
+    const locked = get().lockedMinigameOptionIds;
+    set({
+      pendingOption: null,
+      phase: "dialogue",
+      lockedMinigameOptionIds:
+        option && !locked.includes(option.id) ? [...locked, option.id] : locked,
+    });
   },
 
   setTypedLength: (n) => set({ typedLength: n }),

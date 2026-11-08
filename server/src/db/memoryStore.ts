@@ -8,6 +8,7 @@ import {
   readBookmarks,
   rememberDuckPlace,
   minigameFlag,
+  recordMinigameWinFlags,
   hasClearedMinigame,
   optionIsAvailable,
   type Character,
@@ -183,7 +184,8 @@ export class MemoryStore {
   async applyChoice(
     playerId: string,
     optionId: string,
-    minigameWon?: boolean
+    minigameWon?: boolean,
+    playedMinigameId?: string
   ): Promise<ChoiceResult> {
     this.hydrate();
     const option = this.options.get(optionId);
@@ -281,8 +283,15 @@ export class MemoryStore {
       this.setFriendliness(playerId, node.characterId, nextScore);
     }
 
-    const flags = { ...progress.flags };
-    if (option.minigameId && minigameWon) flags[minigameFlag(option.minigameId)] = true;
+    let flags = { ...progress.flags };
+    if (option.minigameId && minigameWon) {
+      const played = playedMinigameId ?? option.minigameId;
+      flags = recordMinigameWinFlags(flags, {
+        playedMinigameId: played,
+        characterId: node.characterId,
+      });
+      flags[minigameFlag(option.minigameId)] = true;
+    }
 
     this.progress.set(playerId, {
       playerId,

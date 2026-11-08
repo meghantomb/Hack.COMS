@@ -81,14 +81,12 @@ async function seed() {
         id: minigame.id,
         name: minigame.name,
         description: minigame.description,
-        phaserKey: minigame.phaserKey,
       })
       .onConflictDoUpdate({
         target: schema.minigames.id,
         set: {
           name: minigame.name,
           description: minigame.description,
-          phaserKey: minigame.phaserKey,
         },
       });
   }

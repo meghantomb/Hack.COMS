@@ -31,7 +31,7 @@ export function CharacterStage({
     ];
     return (
       <div className="flex h-full min-h-0 w-full items-end justify-center overflow-visible px-1 pb-0">
-        <div className="flex h-[min(100%,28vw)] items-end justify-center">
+        <div className="flex h-[min(100%,26.6vw)] items-end justify-center">
           {row.map((entry, index) =>
             entry.kind === "bread" ? (
               <Player key="bread" facing={layout.playerFacing} overlap={index > 0} />
@@ -93,11 +93,11 @@ const crowdSpriteClass = "h-full w-auto max-w-none object-contain object-bottom"
 
 /** Default fit inside a zone. */
 const fitSpriteClass =
-  "absolute bottom-0 left-1/2 h-auto w-auto max-h-full max-w-[calc(100%-4vw)] -translate-x-1/2 object-contain object-bottom origin-bottom";
+  "absolute bottom-0 left-1/2 h-auto w-auto max-h-full max-w-[calc(100%-4vw)] -translate-x-1/2 scale-95 object-contain object-bottom origin-bottom";
 
-/** Bigger when only a few characters share the stage. */
+/** Bigger when only a few characters share the stage (~5% under prior scale-110). */
 const largeSpriteClass =
-  "absolute bottom-0 left-1/2 h-auto w-auto max-h-[125%] max-w-[min(100%,52vw)] -translate-x-1/2 scale-110 object-contain object-bottom origin-bottom";
+  "absolute bottom-0 left-1/2 h-auto w-auto max-h-[125%] max-w-[min(100%,52vw)] -translate-x-1/2 scale-[1.045] object-contain object-bottom origin-bottom";
 
 function Player({
   facing,

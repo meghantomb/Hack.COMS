@@ -1,6 +1,6 @@
 # What the Duck?
 
-Minimal browser duck dating sim (DDLC-inspired vertical slice). Four ducks (`jock`, `breadluvr`, `badboy`, `artist`) with left/right PNG slots; Breadluvr route playable; love meters; Lily Pad Hop; friendship / romance endings.
+Minimal browser duck dating sim (DDLC-inspired vertical slice). Four ducks (`jock`, `breadluvr`, `badboy`, `artist`) with left/right PNG slots; per-duck signature minigames plus a random pool; love meters; friendship / romance endings.
 
 ## Art (PNG slots)
 
@@ -8,7 +8,7 @@ Drop PNGs into `client/public/assets/` — see that folder’s `README.md`. Path
 
 ## Stack
 
-- **client/** — React, TypeScript, Vite, Tailwind, Zustand, Phaser 3
+- **client/** — React, TypeScript, Vite, Tailwind, Zustand (canvas minigames)
 - **server/** — Node, Express, TypeScript, Drizzle ORM (TigerData / PostgreSQL)
 - **shared/** — Shared types and friendliness helpers
 

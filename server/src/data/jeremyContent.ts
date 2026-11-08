@@ -1,10 +1,9 @@
 import type { Conversation, DialogueNode, DialogueOption, Minigame } from "@duck-dating/shared";
 
 export const drawingGame: Minigame = {
-  id: "DrawingGame",
-  name: "Drawing Game",
-  description: "Sit still while Jeremy sketches you, and keep the pose until he catches the line.",
-  phaserKey: "DrawingGame",
+  id: "pixel_paint",
+  name: "Pond Pixel",
+  description: "Memorize Jeremy's painting, then recreate the 3×3 grid.",
 };
 
 export const JEREMY_FIRST_MEETING_ID = "jeremy_first_meeting";
@@ -585,7 +584,7 @@ export const jeremyOptions: DialogueOption[] = [
     text: "I'll sit. Take the time you need.",
     nextNodeId: "jeremy_after_draw",
     friendlinessDelta: 20,
-    minigameId: "DrawingGame",
+    minigameId: "pixel_paint",
     sortOrder: 0,
   }),
   reply({
@@ -796,7 +795,7 @@ export const jeremyOptions: DialogueOption[] = [
     text: "I'll sit. Try the color.",
     nextNodeId: "jeremy2_after_draw",
     friendlinessDelta: 20,
-    minigameId: "DrawingGame",
+    minigameId: "pixel_paint",
     sortOrder: 0,
   }),
   reply({
@@ -1030,7 +1029,7 @@ export const jeremyOptions: DialogueOption[] = [
     text: "Then have this morning. The true one.",
     nextNodeId: "jeremy3_after_draw",
     friendlinessDelta: 20,
-    minigameId: "DrawingGame",
+    minigameId: "pixel_paint",
     sortOrder: 0,
   }),
   reply({

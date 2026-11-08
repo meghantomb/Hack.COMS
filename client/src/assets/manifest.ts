@@ -21,8 +21,9 @@
  *   assets/intro/title.png  (logo layered on top)
  *
  * Music:
- *   assets/music/Kawai Kitsune.mp3  — title + gameplay
- *   assets/music/Cyborg Ninja.mp3   — intro video
+ *   assets/music/Kawai Kitsune.mp3     — title + gameplay
+ *   assets/music/Cyborg Ninja.mp3      — intro video
+ *   assets/music/Voxel Revolution.mp3  — minigames
  *
  * Staging: MC left / duck right — duck uses *_left, player faces toward the duck.
  */
@@ -77,5 +78,10 @@ export function gameplayMusicSrc(): string {
 /** Intro cutscene loop. */
 export function introMusicSrc(): string {
   return asset(`music/${encodeURIComponent("Cyborg Ninja.mp3")}`);
+}
+
+/** Minigame loop. */
+export function minigameMusicSrc(): string {
+  return asset(`music/${encodeURIComponent("Voxel Revolution.mp3")}`);
 }
 

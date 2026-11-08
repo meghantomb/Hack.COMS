@@ -89,7 +89,6 @@ export interface Minigame {
   id: string;
   name: string;
   description: string;
-  phaserKey: string;
 }
 
 export interface Relationship {
@@ -162,6 +161,8 @@ export interface ChoiceRequest {
   playerId: string;
   optionId: string;
   minigameWon?: boolean;
+  /** Actual minigame cleared (signature or random). */
+  playedMinigameId?: string;
 }
 
 export interface ChoiceResult {

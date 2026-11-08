@@ -47,6 +47,7 @@ const choiceSchema = z.object({
   playerId: z.string().min(1).max(64).default(DEFAULT_PLAYER_ID),
   optionId: z.string().min(1).max(128),
   minigameWon: z.boolean().optional(),
+  playedMinigameId: z.string().min(1).max(64).optional(),
 });
 
 dialogueRouter.post("/choice", async (req, res) => {
@@ -59,7 +60,8 @@ dialogueRouter.post("/choice", async (req, res) => {
     const result = await applyChoice(
       parsed.data.playerId,
       parsed.data.optionId,
-      parsed.data.minigameWon
+      parsed.data.minigameWon,
+      parsed.data.playedMinigameId
     );
     if (!result.success && result.reason === "Minigame required") {
       res.status(409).json(result);

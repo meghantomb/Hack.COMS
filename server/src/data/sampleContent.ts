@@ -48,10 +48,9 @@ export const sampleCharacters: Character[] = [
 export const sampleCharacter = sampleCharacters.find((c) => c.id === "breadluvr")!;
 
 export const sampleMinigame: Minigame = {
-  id: "lily_pad_hop",
-  name: "Lily Pad Hop",
-  description: "Hop across lily pads without falling into the pond.",
-  phaserKey: "LilyPadHop",
+  id: "bread_snake",
+  name: "Bread Snake",
+  description: "Nibble bread crumbs — don't hit the walls or yourself.",
 };
 
 export const SAM_CONVERSATION_ID = "sam_first_meeting";
@@ -795,7 +794,7 @@ export const samOptions: DialogueOption[] = [
     text: "I'll hop. Stay where I can see you.",
     nextNodeId: "after_hop_win",
     friendlinessDelta: 20,
-    minigameId: "lily_pad_hop",
+    minigameId: "bread_snake",
     sortOrder: 0,
   }),
   reply({
@@ -812,7 +811,7 @@ export const samOptions: DialogueOption[] = [
     text: "I'll hop. Stay where I can see you.",
     nextNodeId: "after_hop_win",
     friendlinessDelta: 20,
-    minigameId: "lily_pad_hop",
+    minigameId: "bread_snake",
     sortOrder: 0,
   }),
   reply({

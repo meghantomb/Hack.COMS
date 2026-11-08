@@ -1,11 +1,11 @@
 import type { Conversation, DialogueNode, DialogueOption, Minigame } from "@duck-dating/shared";
-import { reedRaceMinigame, ryanConversations, ryanNodes, ryanOptions } from "./ryanContent";
-import { jeremyConversations, jeremyMinigames, jeremyNodes, jeremyOptions } from "./jeremyContent";
+import { allMinigameRecords } from "@duck-dating/shared";
+import { ryanConversations, ryanNodes, ryanOptions } from "./ryanContent";
+import { jeremyConversations, jeremyNodes, jeremyOptions } from "./jeremyContent";
 import {
   samConversations,
   samNodes,
   samOptions,
-  sampleMinigame,
   shoreNodes,
   shoreOptions,
 } from "./sampleContent";
@@ -20,13 +20,15 @@ export interface DuckScript {
   minigames: Minigame[];
 }
 
+const catalog = allMinigameRecords();
+
 export const duckScripts: DuckScript[] = [
   {
     id: "sam",
     conversations: samConversations,
     nodes: samNodes,
     options: samOptions,
-    minigames: [sampleMinigame],
+    minigames: [],
   },
   {
     id: "xander",
@@ -40,20 +42,21 @@ export const duckScripts: DuckScript[] = [
     conversations: ryanConversations,
     nodes: ryanNodes,
     options: ryanOptions,
-    minigames: [reedRaceMinigame],
+    minigames: [],
   },
   {
     id: "jeremy",
     conversations: jeremyConversations,
     nodes: jeremyNodes,
     options: jeremyOptions,
-    minigames: jeremyMinigames,
+    minigames: [],
   },
 ];
 
 export const sampleConversations = duckScripts.flatMap((script) => script.conversations);
 export const sampleNodes = [...shoreNodes, ...duckScripts.flatMap((script) => script.nodes)];
 export const sampleOptions = [...shoreOptions, ...duckScripts.flatMap((script) => script.options)];
-export const sampleMinigames = duckScripts.flatMap((script) => script.minigames);
+/** Full playable catalog (signatures + random pool). */
+export const sampleMinigames = catalog;
 
 export { shoreNodes, shoreOptions };

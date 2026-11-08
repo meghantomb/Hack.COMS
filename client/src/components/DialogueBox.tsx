@@ -1,6 +1,15 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "../store/gameStore";
 
+function bodyFontRange() {
+  if (typeof window === "undefined") return { min: 15, max: 26 };
+  const w = window.innerWidth;
+  if (w >= 1536) return { min: 18, max: 34 };
+  if (w >= 1280) return { min: 17, max: 30 };
+  if (w >= 1024) return { min: 16, max: 26 };
+  return { min: 14, max: 22 };
+}
+
 /** Fixed-height brown dialogue panel; body text scales down to fit. */
 export function DialogueBox({
   speaker,
@@ -37,8 +46,7 @@ export function DialogueBox({
   useEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
-    const minPx = 13;
-    const maxPx = 22;
+    const { min: minPx, max: maxPx } = bodyFontRange();
     const fit = () => {
       let lo = minPx;
       let hi = maxPx;
@@ -58,7 +66,7 @@ export function DialogueBox({
   return (
     <button
       type="button"
-      className="flex h-[7.5rem] w-full flex-col rounded-2xl bg-ui-panel/70 px-5 py-3 text-left text-white sm:h-32 sm:px-6 sm:py-4"
+      className="flex h-36 w-full flex-col rounded-2xl bg-ui-panel/70 px-5 py-3 text-left text-white sm:h-40 sm:rounded-3xl sm:px-7 sm:py-4 lg:h-48 lg:px-9 lg:py-5 xl:h-56 xl:px-10 xl:py-6"
       onClick={() => {
         if (!done) {
           skipRef.current = true;
@@ -66,12 +74,12 @@ export function DialogueBox({
         }
       }}
     >
-      <div className="shrink-0 font-display text-sm text-ui-cream sm:text-base">
+      <div className="shrink-0 font-display text-base text-ui-cream sm:text-lg lg:text-xl xl:text-2xl">
         {speaker}
       </div>
       <p
         ref={bodyRef}
-        className="mt-1 min-h-0 flex-1 overflow-hidden font-story font-bold leading-snug text-white"
+        className="mt-1 min-h-0 flex-1 overflow-hidden font-story font-bold leading-snug text-white sm:mt-2"
       >
         {shown}
         {!done && <span className="caret">▌</span>}

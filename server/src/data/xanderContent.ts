@@ -607,7 +607,7 @@ export const xanderOptions: DialogueOption[] = [
     text: "I'll hop. Don't you dare leave me in the water.",
     nextNodeId: "xander_after_hop",
     friendlinessDelta: 20,
-    minigameId: "lily_pad_hop",
+    minigameId: "bullet_hell",
     sortOrder: 0,
   }),
   reply({
@@ -616,7 +616,7 @@ export const xanderOptions: DialogueOption[] = [
     text: "Are you asking me, or daring me?",
     nextNodeId: "xander_after_hop",
     friendlinessDelta: 12,
-    minigameId: "lily_pad_hop",
+    minigameId: "bullet_hell",
     sortOrder: 1,
   }),
   reply({
@@ -945,7 +945,7 @@ export const xanderOptions: DialogueOption[] = [
     text: "I'll hop. Lose the audience with me.",
     nextNodeId: "xander3_after_hop",
     friendlinessDelta: 20,
-    minigameId: "lily_pad_hop",
+    minigameId: "bullet_hell",
     sortOrder: 0,
   }),
   reply({

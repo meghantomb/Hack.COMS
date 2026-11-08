@@ -1,14 +1,20 @@
 import { useEffect, useRef } from "react";
-import { gameplayMusicSrc, introMusicSrc } from "../assets/manifest";
+import {
+  gameplayMusicSrc,
+  introMusicSrc,
+  minigameMusicSrc,
+} from "../assets/manifest";
 import type { GamePhase } from "../store/gameStore";
 
-function trackForPhase(phase: GamePhase): "gameplay" | "intro" | null {
+type Track = "gameplay" | "intro" | "minigame";
+
+function trackForPhase(phase: GamePhase): Track | null {
   if (phase === "intro") return "intro";
+  if (phase === "minigame") return "minigame";
   if (
     phase === "title" ||
     phase === "loading" ||
     phase === "dialogue" ||
-    phase === "minigame" ||
     phase === "ending" ||
     phase === "error"
   ) {
@@ -17,48 +23,59 @@ function trackForPhase(phase: GamePhase): "gameplay" | "intro" | null {
   return null;
 }
 
+function pauseReset(audio: HTMLAudioElement) {
+  if (!audio.paused) audio.pause();
+  audio.currentTime = 0;
+}
+
 /**
- * Loops Kawai Kitsune on title/gameplay and Cyborg Ninja during the intro.
+ * Kawai Kitsune on title/gameplay, Cyborg Ninja on intro,
+ * Voxel Revolution during minigames.
  * Resumes after the first click/key if the browser blocks autoplay.
  */
 export function BackgroundMusic({ phase }: { phase: GamePhase }) {
   const gameplayRef = useRef<HTMLAudioElement | null>(null);
   const introRef = useRef<HTMLAudioElement | null>(null);
+  const minigameRef = useRef<HTMLAudioElement | null>(null);
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
   useEffect(() => {
-    const gameplay = new Audio(gameplayMusicSrc());
-    gameplay.loop = true;
-    gameplay.preload = "auto";
-    gameplay.volume = 0.55;
+    const make = (src: string) => {
+      const a = new Audio(src);
+      a.loop = true;
+      a.preload = "auto";
+      a.volume = 0.55;
+      return a;
+    };
 
-    const intro = new Audio(introMusicSrc());
-    intro.loop = true;
-    intro.preload = "auto";
-    intro.volume = 0.55;
+    const gameplay = make(gameplayMusicSrc());
+    const intro = make(introMusicSrc());
+    const minigame = make(minigameMusicSrc());
 
     gameplayRef.current = gameplay;
     introRef.current = intro;
+    minigameRef.current = minigame;
 
     const apply = async () => {
       const wanted = trackForPhase(phaseRef.current);
       try {
         if (wanted === "intro") {
-          if (!gameplay.paused) {
-            gameplay.pause();
-            gameplay.currentTime = 0;
-          }
+          pauseReset(gameplay);
+          pauseReset(minigame);
           if (intro.paused) await intro.play();
+        } else if (wanted === "minigame") {
+          pauseReset(gameplay);
+          pauseReset(intro);
+          if (minigame.paused) await minigame.play();
         } else if (wanted === "gameplay") {
-          if (!intro.paused) {
-            intro.pause();
-            intro.currentTime = 0;
-          }
+          pauseReset(intro);
+          pauseReset(minigame);
           if (gameplay.paused) await gameplay.play();
         } else {
           gameplay.pause();
           intro.pause();
+          minigame.pause();
         }
       } catch {
         // Wait for a user gesture.
@@ -78,30 +95,33 @@ export function BackgroundMusic({ phase }: { phase: GamePhase }) {
       window.removeEventListener("keydown", unlock);
       gameplay.pause();
       intro.pause();
+      minigame.pause();
       gameplayRef.current = null;
       introRef.current = null;
+      minigameRef.current = null;
     };
   }, []);
 
   useEffect(() => {
     const gameplay = gameplayRef.current;
     const intro = introRef.current;
-    if (!gameplay || !intro) return;
+    const minigame = minigameRef.current;
+    if (!gameplay || !intro || !minigame) return;
 
     const wanted = trackForPhase(phase);
     void (async () => {
       try {
         if (wanted === "intro") {
-          if (!gameplay.paused) {
-            gameplay.pause();
-            gameplay.currentTime = 0;
-          }
+          pauseReset(gameplay);
+          pauseReset(minigame);
           if (intro.paused) await intro.play();
+        } else if (wanted === "minigame") {
+          pauseReset(gameplay);
+          pauseReset(intro);
+          if (minigame.paused) await minigame.play();
         } else if (wanted === "gameplay") {
-          if (!intro.paused) {
-            intro.pause();
-            intro.currentTime = 0;
-          }
+          pauseReset(intro);
+          pauseReset(minigame);
           if (gameplay.paused) await gameplay.play();
         }
       } catch {

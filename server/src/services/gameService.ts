@@ -12,6 +12,7 @@ import {
   getFriendlinessTier,
   hasClearedMinigame,
   minigameFlag,
+  recordMinigameWinFlags,
   optionIsAvailable,
   readBookmarks,
   rememberDuckPlace,
@@ -336,11 +337,12 @@ export async function getDialogueBundle(
 export async function applyChoice(
   playerId: string,
   optionId: string,
-  minigameWon?: boolean
+  minigameWon?: boolean,
+  playedMinigameId?: string
 ): Promise<ChoiceResult> {
   await ensurePlayer(playerId);
   if (!isUsingDatabase()) {
-    return memoryStore.applyChoice(playerId, optionId, minigameWon);
+    return memoryStore.applyChoice(playerId, optionId, minigameWon, playedMinigameId);
   }
 
   const db = getDb()!;
@@ -491,8 +493,15 @@ export async function applyChoice(
       });
   }
 
-  const flags = { ...((progressRow?.flags as Record<string, boolean> | null) ?? {}) };
-  if (option.minigameId && minigameWon) flags[minigameFlag(option.minigameId)] = true;
+  let flags = { ...((progressRow?.flags as Record<string, boolean> | null) ?? {}) };
+  if (option.minigameId && minigameWon) {
+    const played = playedMinigameId ?? option.minigameId;
+    flags = recordMinigameWinFlags(flags, {
+      playedMinigameId: played,
+      characterId: node.characterId,
+    });
+    flags[minigameFlag(option.minigameId)] = true;
+  }
 
   await db
     .insert(schema.playerProgress)

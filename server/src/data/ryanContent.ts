@@ -1,10 +1,9 @@
 import type { Conversation, DialogueNode, DialogueOption, Minigame } from "@duck-dating/shared";
 
 export const reedRaceMinigame: Minigame = {
-  id: "reed_race",
-  name: "Reed Race",
-  description: "Race around the reeds without wiping out in the pond.",
-  phaserKey: "ReedRace",
+  id: "slide_puzzle",
+  name: "Jock Slide",
+  description: "Slide the cars and get the duck-mobile out of the garage.",
 };
 
 export const RYAN_FIRST_MEETING_ID = "ryan_first_meeting";
@@ -521,7 +520,7 @@ export const ryanOptions: DialogueOption[] = [
     text: "I'll race. Don't you dare go easy on me.",
     nextNodeId: "ryan_after_win",
     friendlinessDelta: 20,
-    minigameId: "reed_race",
+    minigameId: "slide_puzzle",
     sortOrder: 0,
   }),
   reply({
@@ -673,7 +672,7 @@ export const ryanOptions: DialogueOption[] = [
     text: "I'll race. Stay where I can see you.",
     nextNodeId: "ryan_train_win",
     friendlinessDelta: 20,
-    minigameId: "reed_race",
+    minigameId: "slide_puzzle",
     sortOrder: 0,
   }),
   reply({

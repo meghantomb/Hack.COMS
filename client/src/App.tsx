@@ -105,7 +105,7 @@ export default function App() {
         <Background />
 
         {/* Characters stay fixed behind UI; kept low in the frame. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[24%] z-10 pb-[10rem] sm:top-[26%] sm:pb-48">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[26%] z-10 pb-36 sm:top-[28%] sm:pb-44 lg:top-[24%] lg:pb-52 xl:pb-60">
           <CharacterStage layout={layout} showDucks={showDucks} />
         </div>
 
@@ -116,7 +116,7 @@ export default function App() {
         />
 
         {phase === "dialogue" && (
-          <div className="absolute inset-x-0 bottom-0 z-20 mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 pb-4 pr-20 sm:px-8 sm:pb-6 sm:pr-24">
+          <div className="absolute inset-x-0 bottom-0 z-20 mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pb-5 pr-20 sm:gap-4 sm:px-8 sm:pb-7 sm:pr-28 lg:max-w-6xl lg:gap-5 lg:px-10 lg:pb-9 lg:pr-32 xl:max-w-7xl xl:gap-6 xl:px-12 xl:pb-11 xl:pr-36">
             <DialogueBox speaker={bundle.node.speaker} text={bundle.node.text} />
             <ChoiceMenu options={bundle.options} />
           </div>

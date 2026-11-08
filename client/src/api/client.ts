@@ -39,13 +39,14 @@ export function fetchNode(nodeId: string, playerId = DEFAULT_PLAYER_ID) {
 export function postChoice(
   optionId: string,
   minigameWon?: boolean,
-  playerId = DEFAULT_PLAYER_ID
+  playerId = DEFAULT_PLAYER_ID,
+  playedMinigameId?: string
 ) {
   return request<ChoiceResult & { bundle: DialogueBundle | null }>(
     "/api/dialogue/choice",
     {
       method: "POST",
-      body: JSON.stringify({ playerId, optionId, minigameWon }),
+      body: JSON.stringify({ playerId, optionId, minigameWon, playedMinigameId }),
     }
   );
 }

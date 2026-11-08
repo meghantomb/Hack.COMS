@@ -69,7 +69,6 @@ export const minigames = pgTable("minigames", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  phaserKey: text("phaser_key").notNull(),
 });
 
 export const relationships = pgTable(

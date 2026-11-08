@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS dialogue_nodes (
 CREATE TABLE IF NOT EXISTS minigames (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  description TEXT NOT NULL,
-  phaser_key TEXT NOT NULL
+  description TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS dialogue_options (
