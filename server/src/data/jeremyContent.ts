@@ -94,7 +94,11 @@ function reply(
 }
 
 /** A visit can continue. The game itself only ends on a real refusal or the last scene. */
-function visit(conversationId: string, node: Parameters<typeof line>[1]): DialogueNode {
+function visit(
+  conversationId: string,
+  node: Omit<Parameters<typeof line>[1], "isEnding" | "endingType"> &
+    Partial<Pick<DialogueNode, "isEnding" | "endingType">>
+): DialogueNode {
   return line(conversationId, { ...node, isEnding: false, endingType: "bad" });
 }
 
