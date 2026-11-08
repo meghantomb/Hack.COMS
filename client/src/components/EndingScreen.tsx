@@ -5,15 +5,15 @@ export function EndingScreen() {
   const restart = useGameStore((s) => s.restart);
   if (!bundle) return null;
 
-  const romance = bundle.node.endingType === "romance";
+  const good = bundle.node.endingType === "good";
 
   return (
     <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-pond-ink/80 px-6 text-center backdrop-blur-sm">
       <p className="font-display text-sm uppercase tracking-[0.3em] text-pond-sunset">
-        {romance ? "Romance Ending" : "Friendship Ending"}
+        {good ? "Good Ending" : "Bad Ending"}
       </p>
       <h2 className="mt-3 max-w-lg font-display text-3xl text-pond-foam sm:text-4xl">
-        {romance ? "Hearts on the Water" : "Pondside Friends"}
+        {good ? "Eaten, With Love" : "Just Dinner"}
       </h2>
       <p className="mt-4 max-w-md font-story text-lg text-pond-foam/85">
         {bundle.node.text}

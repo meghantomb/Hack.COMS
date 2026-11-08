@@ -74,15 +74,27 @@ CREATE TABLE IF NOT EXISTS characters (
   description TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS conversations (
+  id TEXT PRIMARY KEY,
+  character_id TEXT NOT NULL REFERENCES characters(id),
+  title TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  max_exchanges INTEGER NOT NULL DEFAULT 20
+);
+
 CREATE TABLE IF NOT EXISTS dialogue_nodes (
   id TEXT PRIMARY KEY,
   character_id TEXT NOT NULL REFERENCES characters(id),
+  conversation_id TEXT REFERENCES conversations(id),
   speaker TEXT NOT NULL,
   text TEXT NOT NULL,
   background_key TEXT NOT NULL DEFAULT 'pond',
   sprite_expression TEXT NOT NULL DEFAULT 'neutral',
   is_ending BOOLEAN NOT NULL DEFAULT FALSE,
-  ending_type TEXT
+  ending_type TEXT NOT NULL DEFAULT 'bad' CHECK (ending_type IN ('good', 'bad')),
+  min_friendliness INTEGER NOT NULL DEFAULT 0,
+  guest_character_id TEXT REFERENCES characters(id),
+  variant_group TEXT
 );
 
 CREATE TABLE IF NOT EXISTS minigames (
@@ -99,7 +111,9 @@ CREATE TABLE IF NOT EXISTS dialogue_options (
   next_node_id TEXT NOT NULL REFERENCES dialogue_nodes(id),
   friendliness_delta INTEGER NOT NULL DEFAULT 0,
   required_tier TEXT,
+  min_friendliness INTEGER NOT NULL DEFAULT 0,
   minigame_id TEXT,
+  continues_conversation BOOLEAN NOT NULL DEFAULT FALSE,
   sort_order INTEGER NOT NULL DEFAULT 0,
   is_ai_generated BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -115,6 +129,10 @@ CREATE TABLE IF NOT EXISTS player_progress (
   player_id TEXT PRIMARY KEY,
   current_node_id TEXT NOT NULL REFERENCES dialogue_nodes(id),
   character_id TEXT NOT NULL REFERENCES characters(id),
+  conversation_id TEXT REFERENCES conversations(id),
+  exchange_count INTEGER NOT NULL DEFAULT 0,
+  consecutive_conversations INTEGER NOT NULL DEFAULT 0,
+  ending_type TEXT NOT NULL DEFAULT 'bad' CHECK (ending_type IN ('good', 'bad')),
   flags JSONB NOT NULL DEFAULT '{}'::jsonb,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

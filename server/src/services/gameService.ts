@@ -1,36 +1,67 @@
 import {
   and,
   eq,
+  inArray,
 } from "drizzle-orm";
 import {
   DEFAULT_PLAYER_ID,
   DUCK_CHARACTER_IDS,
   SAMPLE_CHARACTER_ID,
   START_NODE_ID,
+  advanceConversation,
   getFriendlinessTier,
+  minigameFlag,
+  optionIsAvailable,
   type AiDialogueOption,
   type ChoiceResult,
   type DialogueBundle,
+  type DialogueNode,
   type DialogueOption,
+  type EndingType,
   type FriendlinessTier,
   type LoveMeter,
   type PlayerProgress,
+  type StagePresence,
 } from "@duck-dating/shared";
 import { getDb, isUsingDatabase, memoryStore, schema } from "../db";
 
 
-const tierOrder: FriendlinessTier[] = [
-  "stranger",
-  "acquaintance",
-  "friend",
-  "crush",
-  "romance",
-];
-
-function meetsTier(current: FriendlinessTier, required: FriendlinessTier | null) {
-  if (!required) return true;
-  return tierOrder.indexOf(current) >= tierOrder.indexOf(required);
+function asEnding(value: string | null | undefined): EndingType {
+  return value === "good" ? "good" : "bad";
 }
+
+function toNode(row: typeof schema.dialogueNodes.$inferSelect): DialogueNode {
+  return {
+    id: row.id,
+    characterId: row.characterId,
+    conversationId: row.conversationId ?? null,
+    speaker: row.speaker,
+    text: row.text,
+    backgroundKey: row.backgroundKey,
+    spriteExpression: row.spriteExpression,
+    isEnding: row.isEnding,
+    endingType: asEnding(row.endingType),
+    minFriendliness: row.minFriendliness ?? 0,
+    guestCharacterId: row.guestCharacterId ?? null,
+    variantGroup: row.variantGroup ?? null,
+  };
+}
+
+function stageFor(node: DialogueNode): StagePresence[] | undefined {
+  if (!node.guestCharacterId) return undefined;
+  return [
+    { characterId: node.guestCharacterId, side: "left" },
+    { characterId: node.characterId, side: "right" },
+  ];
+}
+
+const emptyProgress = {
+  conversationId: null as string | null,
+  exchangeCount: 0,
+  consecutiveConversations: 0,
+  endingType: "bad" as EndingType,
+  flags: {} as Record<string, boolean>,
+};
 
 export async function ensurePlayer(playerId = DEFAULT_PLAYER_ID) {
   if (!isUsingDatabase()) {
@@ -56,6 +87,10 @@ export async function ensurePlayer(playerId = DEFAULT_PLAYER_ID) {
       playerId,
       currentNodeId: START_NODE_ID,
       characterId: SAMPLE_CHARACTER_ID,
+      conversationId: emptyProgress.conversationId,
+      exchangeCount: 0,
+      consecutiveConversations: 0,
+      endingType: "bad",
       flags: {},
     });
   }
@@ -82,6 +117,10 @@ export async function resetPlayer(playerId = DEFAULT_PLAYER_ID) {
       playerId,
       currentNodeId: START_NODE_ID,
       characterId: SAMPLE_CHARACTER_ID,
+      conversationId: emptyProgress.conversationId,
+      exchangeCount: 0,
+      consecutiveConversations: 0,
+      endingType: "bad",
       flags: {},
       updatedAt: new Date(),
     })
@@ -90,6 +129,10 @@ export async function resetPlayer(playerId = DEFAULT_PLAYER_ID) {
       set: {
         currentNodeId: START_NODE_ID,
         characterId: SAMPLE_CHARACTER_ID,
+        conversationId: emptyProgress.conversationId,
+        exchangeCount: 0,
+        consecutiveConversations: 0,
+        endingType: "bad",
         flags: {},
         updatedAt: new Date(),
       },
@@ -158,16 +201,56 @@ export async function getDialogueBundle(
 
   const friendliness = rel?.friendliness ?? 0;
   const tier = getFriendlinessTier(friendliness);
+  const spoken = toNode(node);
+
+  const [progressRow] = await db
+    .select()
+    .from(schema.playerProgress)
+    .where(eq(schema.playerProgress.playerId, playerId))
+    .limit(1);
+
+  const [conversation] = spoken.conversationId
+    ? await db
+        .select()
+        .from(schema.conversations)
+        .where(eq(schema.conversations.id, spoken.conversationId))
+        .limit(1)
+    : [];
 
   const allOptions = await db
     .select()
     .from(schema.dialogueOptions)
     .where(eq(schema.dialogueOptions.nodeId, nodeId));
 
+  const nextIds = [...new Set(allOptions.map((o) => o.nextNodeId))];
+  const nextRows = nextIds.length
+    ? await db
+        .select()
+        .from(schema.dialogueNodes)
+        .where(inArray(schema.dialogueNodes.id, nextIds))
+    : [];
+  const nextById = new Map(nextRows.map((row) => [row.id, toNode(row)]));
+
+  const exchangeCount = progressRow?.exchangeCount ?? 0;
+  const consecutiveConversations = progressRow?.consecutiveConversations ?? 0;
+  const maxExchanges = conversation?.maxExchanges ?? 20;
+
   const options: DialogueOption[] = allOptions
-    .filter((o) =>
-      meetsTier(tier, (o.requiredTier as FriendlinessTier | null) ?? null)
-    )
+    .filter((o) => {
+      const next = nextById.get(o.nextNodeId);
+      return optionIsAvailable({
+        minFriendliness: o.minFriendliness ?? 0,
+        requiredTier: (o.requiredTier as FriendlinessTier | null) ?? null,
+        continuesConversation: o.continuesConversation ?? false,
+        nextMinFriendliness: next?.minFriendliness ?? 0,
+        friendliness,
+        tier,
+        staysInConversation: (next?.conversationId ?? null) === spoken.conversationId,
+        exchangeCount,
+        maxExchanges,
+        consecutiveConversations,
+      });
+    })
     .map((o) => ({
       id: o.id,
       nodeId: o.nodeId,
@@ -175,22 +258,15 @@ export async function getDialogueBundle(
       nextNodeId: o.nextNodeId,
       friendlinessDelta: o.friendlinessDelta,
       requiredTier: (o.requiredTier as FriendlinessTier | null) ?? null,
+      minFriendliness: o.minFriendliness ?? 0,
       minigameId: o.minigameId,
+      continuesConversation: o.continuesConversation ?? false,
       sortOrder: o.sortOrder,
     }))
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
   return {
-    node: {
-      id: node.id,
-      characterId: node.characterId,
-      speaker: node.speaker,
-      text: node.text,
-      backgroundKey: node.backgroundKey,
-      spriteExpression: node.spriteExpression,
-      isEnding: node.isEnding,
-      endingType: (node.endingType as "friendship" | "romance" | null) ?? null,
-    },
+    node: spoken,
     options,
     character: {
       id: character.id,
@@ -202,6 +278,7 @@ export async function getDialogueBundle(
     friendliness,
     tier,
     loveMeters: await loadLoveMeters(playerId),
+    onStage: stageFor(spoken),
   };
 }
 
@@ -233,13 +310,18 @@ export async function applyChoice(
     };
   }
 
-  const [node] = await db
+  const [nodeRow] = await db
     .select()
     .from(schema.dialogueNodes)
     .where(eq(schema.dialogueNodes.id, option.nodeId))
     .limit(1);
+  const [nextRow] = await db
+    .select()
+    .from(schema.dialogueNodes)
+    .where(eq(schema.dialogueNodes.id, option.nextNodeId))
+    .limit(1);
 
-  if (!node) {
+  if (!nodeRow || !nextRow) {
     return {
       success: false,
       reason: "Unknown node",
@@ -249,6 +331,9 @@ export async function applyChoice(
       unlocked: false,
     };
   }
+
+  const node = toNode(nodeRow);
+  const nextNode = toNode(nextRow);
 
   const [rel] = await db
     .select()
@@ -261,15 +346,39 @@ export async function applyChoice(
     )
     .limit(1);
 
+  const [progressRow] = await db
+    .select()
+    .from(schema.playerProgress)
+    .where(eq(schema.playerProgress.playerId, playerId))
+    .limit(1);
+
   const friendliness = rel?.friendliness ?? 0;
   const tier = getFriendlinessTier(friendliness);
+  const [conversation] = node.conversationId
+    ? await db
+        .select()
+        .from(schema.conversations)
+        .where(eq(schema.conversations.id, node.conversationId))
+        .limit(1)
+    : [];
 
-  if (
-    !meetsTier(tier, (option.requiredTier as FriendlinessTier | null) ?? null)
-  ) {
+  const available = optionIsAvailable({
+    minFriendliness: option.minFriendliness ?? 0,
+    requiredTier: (option.requiredTier as FriendlinessTier | null) ?? null,
+    continuesConversation: option.continuesConversation ?? false,
+    nextMinFriendliness: nextNode.minFriendliness,
+    friendliness,
+    tier,
+    staysInConversation: nextNode.conversationId === node.conversationId,
+    exchangeCount: progressRow?.exchangeCount ?? 0,
+    maxExchanges: conversation?.maxExchanges ?? 20,
+    consecutiveConversations: progressRow?.consecutiveConversations ?? 0,
+  });
+
+  if (!available) {
     return {
       success: false,
-      reason: `Requires ${option.requiredTier} tier`,
+      reason: "That reply isn't available",
       friendliness,
       tier,
       nextNodeId: null,
@@ -302,20 +411,44 @@ export async function applyChoice(
       set: { friendliness: next },
     });
 
+  const moved = advanceConversation({
+    exchangeCount: progressRow?.exchangeCount ?? 0,
+    consecutiveConversations: progressRow?.consecutiveConversations ?? 0,
+    endingType: asEnding(progressRow?.endingType),
+    currentConversationId: node.conversationId,
+    currentCharacterId: node.characterId,
+    nextConversationId: nextNode.conversationId,
+    nextCharacterId: nextNode.characterId,
+    nextIsEnding: nextNode.isEnding,
+    nextEndingType: nextNode.endingType,
+  });
+
+  const flags = { ...((progressRow?.flags as Record<string, boolean> | null) ?? {}) };
+  if (option.minigameId && minigameWon) flags[minigameFlag(option.minigameId)] = true;
+
   await db
     .insert(schema.playerProgress)
     .values({
       playerId,
       currentNodeId: option.nextNodeId,
-      characterId: node.characterId,
-      flags: {},
+      characterId: nextNode.characterId,
+      conversationId: moved.conversationId,
+      exchangeCount: moved.exchangeCount,
+      consecutiveConversations: moved.consecutiveConversations,
+      endingType: moved.endingType,
+      flags,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: schema.playerProgress.playerId,
       set: {
         currentNodeId: option.nextNodeId,
-        characterId: node.characterId,
+        characterId: nextNode.characterId,
+        conversationId: moved.conversationId,
+        exchangeCount: moved.exchangeCount,
+        consecutiveConversations: moved.consecutiveConversations,
+        endingType: moved.endingType,
+        flags,
         updatedAt: new Date(),
       },
     });
@@ -339,12 +472,30 @@ export async function saveProgress(
     return memoryStore.saveProgress(playerId, currentNodeId, characterId, flags);
   }
   const db = getDb()!;
+  const [existing] = await db
+    .select()
+    .from(schema.playerProgress)
+    .where(eq(schema.playerProgress.playerId, playerId))
+    .limit(1);
+  const [nodeRow] = await db
+    .select()
+    .from(schema.dialogueNodes)
+    .where(eq(schema.dialogueNodes.id, currentNodeId))
+    .limit(1);
+  const node = nodeRow ? toNode(nodeRow) : null;
+  const endingType = node?.isEnding ? node.endingType : asEnding(existing?.endingType);
+  const conversationId = node?.conversationId ?? existing?.conversationId ?? null;
+
   await db
     .insert(schema.playerProgress)
     .values({
       playerId,
       currentNodeId,
       characterId,
+      conversationId,
+      exchangeCount: existing?.exchangeCount ?? 0,
+      consecutiveConversations: existing?.consecutiveConversations ?? 0,
+      endingType,
       flags,
       updatedAt: new Date(),
     })
@@ -353,6 +504,8 @@ export async function saveProgress(
       set: {
         currentNodeId,
         characterId,
+        conversationId,
+        endingType,
         flags,
         updatedAt: new Date(),
       },
@@ -362,6 +515,10 @@ export async function saveProgress(
     playerId,
     currentNodeId,
     characterId,
+    conversationId,
+    exchangeCount: existing?.exchangeCount ?? 0,
+    consecutiveConversations: existing?.consecutiveConversations ?? 0,
+    endingType,
     flags,
     updatedAt: new Date().toISOString(),
   };
@@ -385,6 +542,10 @@ export async function getProgress(
     playerId: row.playerId,
     currentNodeId: row.currentNodeId,
     characterId: row.characterId,
+    conversationId: row.conversationId ?? null,
+    exchangeCount: row.exchangeCount ?? 0,
+    consecutiveConversations: row.consecutiveConversations ?? 0,
+    endingType: asEnding(row.endingType),
     flags: (row.flags as Record<string, boolean>) ?? {},
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -427,7 +588,9 @@ export async function insertAiDialogueOptions(
       nextNodeId: fallbackNext,
       friendlinessDelta: opt.friendlinessDelta,
       requiredTier: null,
+      minFriendliness: 0,
       minigameId: null,
+      continuesConversation: false,
       sortOrder: sort,
       isAiGenerated: true,
     });
@@ -438,7 +601,9 @@ export async function insertAiDialogueOptions(
       nextNodeId: fallbackNext,
       friendlinessDelta: opt.friendlinessDelta,
       requiredTier: null,
+      minFriendliness: 0,
       minigameId: null,
+      continuesConversation: false,
       sortOrder: sort,
     });
     sort += 1;

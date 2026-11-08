@@ -8,6 +8,7 @@ dotenv.config();
 import * as schema from "./schema";
 import {
   sampleCharacters,
+  sampleConversations,
   sampleMinigame,
   sampleNodes,
   sampleOptions,
@@ -37,7 +38,36 @@ async function seed() {
         spriteKey: c.spriteKey,
         description: c.description,
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: schema.characters.id,
+        set: {
+          name: c.name,
+          personality: c.personality,
+          spriteKey: c.spriteKey,
+          description: c.description,
+        },
+      });
+  }
+
+  for (const conversation of sampleConversations) {
+    await db
+      .insert(schema.conversations)
+      .values({
+        id: conversation.id,
+        characterId: conversation.characterId,
+        title: conversation.title,
+        sortOrder: conversation.sortOrder,
+        maxExchanges: conversation.maxExchanges,
+      })
+      .onConflictDoUpdate({
+        target: schema.conversations.id,
+        set: {
+          characterId: conversation.characterId,
+          title: conversation.title,
+          sortOrder: conversation.sortOrder,
+          maxExchanges: conversation.maxExchanges,
+        },
+      });
   }
 
   await db
@@ -56,14 +86,33 @@ async function seed() {
       .values({
         id: node.id,
         characterId: node.characterId,
+        conversationId: node.conversationId,
         speaker: node.speaker,
         text: node.text,
         backgroundKey: node.backgroundKey,
         spriteExpression: node.spriteExpression,
         isEnding: node.isEnding,
         endingType: node.endingType,
+        minFriendliness: node.minFriendliness,
+        guestCharacterId: node.guestCharacterId,
+        variantGroup: node.variantGroup,
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: schema.dialogueNodes.id,
+        set: {
+          characterId: node.characterId,
+          conversationId: node.conversationId,
+          speaker: node.speaker,
+          text: node.text,
+          backgroundKey: node.backgroundKey,
+          spriteExpression: node.spriteExpression,
+          isEnding: node.isEnding,
+          endingType: node.endingType,
+          minFriendliness: node.minFriendliness,
+          guestCharacterId: node.guestCharacterId,
+          variantGroup: node.variantGroup,
+        },
+      });
   }
 
   for (const opt of sampleOptions) {
@@ -76,11 +125,26 @@ async function seed() {
         nextNodeId: opt.nextNodeId,
         friendlinessDelta: opt.friendlinessDelta,
         requiredTier: opt.requiredTier,
+        minFriendliness: opt.minFriendliness,
         minigameId: opt.minigameId,
+        continuesConversation: opt.continuesConversation,
         sortOrder: opt.sortOrder,
         isAiGenerated: false,
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: schema.dialogueOptions.id,
+        set: {
+          nodeId: opt.nodeId,
+          text: opt.text,
+          nextNodeId: opt.nextNodeId,
+          friendlinessDelta: opt.friendlinessDelta,
+          requiredTier: opt.requiredTier,
+          minFriendliness: opt.minFriendliness,
+          minigameId: opt.minigameId,
+          continuesConversation: opt.continuesConversation,
+          sortOrder: opt.sortOrder,
+        },
+      });
   }
 
   for (const characterId of DUCK_CHARACTER_IDS) {
@@ -100,6 +164,10 @@ async function seed() {
       playerId: DEFAULT_PLAYER_ID,
       currentNodeId: START_NODE_ID,
       characterId: SAMPLE_CHARACTER_ID,
+      conversationId: "sam_first_meeting",
+      exchangeCount: 0,
+      consecutiveConversations: 0,
+      endingType: "bad",
       flags: {},
     })
     .onConflictDoNothing();

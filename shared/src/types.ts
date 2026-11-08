@@ -37,15 +37,35 @@ export interface Character {
   description: string;
 }
 
+/** Good endings are set on purpose. Everything else stays bad. */
+export type EndingType = "good" | "bad";
+
+export interface Conversation {
+  id: string;
+  characterId: string;
+  title: string;
+  sortOrder: number;
+  /** Player replies in this conversation before it must end. */
+  maxExchanges: number;
+}
+
 export interface DialogueNode {
   id: string;
   characterId: string;
+  conversationId: string | null;
   speaker: string;
   text: string;
   backgroundKey: string;
   spriteExpression: string;
   isEnding: boolean;
-  endingType: "friendship" | "romance" | null;
+  /** Defaults to bad. A good ending is the line that changes it. */
+  endingType: EndingType;
+  /** This duck line is offered only once closeness reaches this score. */
+  minFriendliness: number;
+  /** Another duck standing in the scene. Bread moves to the center when set. */
+  guestCharacterId: string | null;
+  /** Alternate wordings of one beat. The option points at the line the player has earned. */
+  variantGroup: string | null;
 }
 
 export interface DialogueOption {
@@ -55,7 +75,11 @@ export interface DialogueOption {
   nextNodeId: string;
   friendlinessDelta: number;
   requiredTier: FriendlinessTier | null;
+  /** Exact closeness required before this reply is shown. */
+  minFriendliness: number;
   minigameId: string | null;
+  /** Starts another conversation with the same duck. Hidden after three in a row. */
+  continuesConversation: boolean;
   sortOrder: number;
 }
 
@@ -76,6 +100,13 @@ export interface PlayerProgress {
   playerId: string;
   currentNodeId: string;
   characterId: string;
+  conversationId: string | null;
+  /** Replies already given in the current conversation. */
+  exchangeCount: number;
+  /** Finished conversations in a row with the duck they are still talking to. */
+  consecutiveConversations: number;
+  /** Stays bad until a good ending node changes it. */
+  endingType: EndingType;
   flags: Record<string, boolean>;
   updatedAt: string;
 }
@@ -155,4 +186,4 @@ export interface AiGenerationResult {
 
 export const DEFAULT_PLAYER_ID = "local-player";
 export const SAMPLE_CHARACTER_ID = "breadluvr";
-export const START_NODE_ID = "pond_meet";
+export const START_NODE_ID = "pond_shore";

@@ -16,17 +16,33 @@ export const characters = pgTable("characters", {
   description: text("description").notNull(),
 });
 
+/** One visit with a duck. A route is several of these, capped at max_exchanges replies. */
+export const conversations = pgTable("conversations", {
+  id: text("id").primaryKey(),
+  characterId: text("character_id")
+    .notNull()
+    .references(() => characters.id),
+  title: text("title").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  maxExchanges: integer("max_exchanges").notNull().default(20),
+});
+
 export const dialogueNodes = pgTable("dialogue_nodes", {
   id: text("id").primaryKey(),
   characterId: text("character_id")
     .notNull()
     .references(() => characters.id),
+  conversationId: text("conversation_id").references(() => conversations.id),
   speaker: text("speaker").notNull(),
   text: text("text").notNull(),
   backgroundKey: text("background_key").notNull().default("pond"),
   spriteExpression: text("sprite_expression").notNull().default("neutral"),
   isEnding: boolean("is_ending").notNull().default(false),
-  endingType: text("ending_type"), // 'friendship' | 'romance' | null
+  /** 'good' | 'bad'. Bad until a good ending line changes it. */
+  endingType: text("ending_type").notNull().default("bad"),
+  minFriendliness: integer("min_friendliness").notNull().default(0),
+  guestCharacterId: text("guest_character_id").references(() => characters.id),
+  variantGroup: text("variant_group"),
 });
 
 export const dialogueOptions = pgTable("dialogue_options", {
@@ -39,8 +55,10 @@ export const dialogueOptions = pgTable("dialogue_options", {
     .notNull()
     .references(() => dialogueNodes.id),
   friendlinessDelta: integer("friendliness_delta").notNull().default(0),
-  requiredTier: text("required_tier"), // FriendlinessTier | null
+  requiredTier: text("required_tier"),
+  minFriendliness: integer("min_friendliness").notNull().default(0),
   minigameId: text("minigame_id"),
+  continuesConversation: boolean("continues_conversation").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   isAiGenerated: boolean("is_ai_generated").notNull().default(false),
 });
@@ -74,6 +92,10 @@ export const playerProgress = pgTable("player_progress", {
   characterId: text("character_id")
     .notNull()
     .references(() => characters.id),
+  conversationId: text("conversation_id").references(() => conversations.id),
+  exchangeCount: integer("exchange_count").notNull().default(0),
+  consecutiveConversations: integer("consecutive_conversations").notNull().default(0),
+  endingType: text("ending_type").notNull().default("bad"),
   flags: jsonb("flags").$type<Record<string, boolean>>().notNull().default({}),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

@@ -1,9 +1,11 @@
 import type {
   Character,
+  Conversation,
   DialogueNode,
   DialogueOption,
   Minigame,
 } from "@duck-dating/shared";
+import { xanderConversations, xanderNodes, xanderOptions } from "./xanderContent";
 
 /**
  * Four duck slots. Art files (flat under client/public/assets/ducks/):
@@ -53,258 +55,304 @@ export const sampleMinigame: Minigame = {
   phaserKey: "LilyPadHop",
 };
 
-export const sampleNodes: DialogueNode[] = [
+export const SAM_CONVERSATION_ID = "sam_first_meeting";
+
+export const sampleConversations: Conversation[] = [
   {
+    id: SAM_CONVERSATION_ID,
+    characterId: "breadluvr",
+    title: "Sam at the pond",
+    sortOrder: 0,
+    maxExchanges: 20,
+  },
+  ...xanderConversations,
+];
+
+function line(
+  node: Omit<
+    DialogueNode,
+    "conversationId" | "endingType" | "minFriendliness" | "guestCharacterId" | "variantGroup"
+  > &
+    Partial<
+      Pick<
+        DialogueNode,
+        "conversationId" | "endingType" | "minFriendliness" | "guestCharacterId" | "variantGroup"
+      >
+    >
+): DialogueNode {
+  return {
+    conversationId: SAM_CONVERSATION_ID,
+    endingType: "bad",
+    minFriendliness: 0,
+    guestCharacterId: null,
+    variantGroup: null,
+    ...node,
+  };
+}
+
+function reply(
+  option: Omit<DialogueOption, "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier"> &
+    Partial<Pick<DialogueOption, "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier">>
+): DialogueOption {
+  return {
+    minFriendliness: 0,
+    continuesConversation: false,
+    minigameId: null,
+    requiredTier: null,
+    ...option,
+  };
+}
+
+export const sampleNodes: DialogueNode[] = [
+  line({
+    id: "pond_shore",
+    characterId: "breadluvr",
+    conversationId: null,
+    speaker: "Narrator",
+    text: "The hill ends at the campus pond. One duck waits in the sun, already staring like he has been hungry for you his whole life. At the far bank, another sits in the dark and pretends he has not seen you roll in.",
+    backgroundKey: "pond",
+    spriteExpression: "neutral",
+    isEnding: false,
+    guestCharacterId: "badboy",
+  }),
+  line({
     id: "pond_meet",
     characterId: "breadluvr",
     speaker: "Narrator",
-    text: "Morning mist curls over the campus pond. A duck glances up from a notebook of poems—and a suspiciously large pile of bread crumbs.",
+    text: "You tumble out of the reeds, still warm from the kitchen. A yellow duck is already staring. He looks at you the way someone looks at a meal they have decided to marry.",
     backgroundKey: "pond",
     spriteExpression: "neutral",
     isEnding: false,
-    endingType: null,
-  },
-  {
+  }),
+  line({
     id: "breadluvr_hello",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "Oh—hi. I didn't think anyone else came here this early. I'm Breadluvr. Do you... like ponds too?",
+    text: "Oh. You're real. I'm Sam. Don't roll away. I can smell the crust from here, and I am trying so hard to be normal about it.",
     backgroundKey: "pond",
     spriteExpression: "shy",
     isEnding: false,
-    endingType: null,
-  },
-  {
+  }),
+  line({
     id: "small_talk",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "The water looks calm today. Sometimes I write about the way lily pads drift. It sounds silly when I say it out loud.",
+    text: "I won't eat you. I'll sit in the sun with you and think about eating you, which is different, because I love you. I think I love you. We just met.",
     backgroundKey: "pond",
     spriteExpression: "neutral",
     isEnding: false,
-    endingType: null,
-  },
-  {
+  }),
+  line({
     id: "invite_hop",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "There's a path of lily pads to the little island. I never try it alone... Would you hop across with me?",
+    text: "Lily pads go out to the island. Come with me. If the others see you they'll want a bite, and I want you all to myself. Hop?",
     backgroundKey: "pond",
     spriteExpression: "hopeful",
     isEnding: false,
-    endingType: null,
-  },
-  {
+  }),
+  line({
     id: "after_hop_win",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "You made it! My heart's still racing. Thank you for going with me. I feel... safer when you're around.",
+    text: "You came. Nobody else gets you. My stomach hurts in the nice way. Sit in the sun with me. Just us.",
     backgroundKey: "island",
     spriteExpression: "happy",
     isEnding: false,
-    endingType: null,
-  },
-  {
+  }),
+  line({
     id: "after_decline",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "That's okay. We can just sit here. The ripples are company enough... most days.",
+    text: "Fine. I'll sit on my wings. See? Gentle. I can be gentle while I memorize how you'd crisp.",
     backgroundKey: "pond",
     spriteExpression: "sad",
     isEnding: false,
-    endingType: null,
-  },
-  {
+  }),
+  line({
     id: "deeper_chat",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "Can I ask something? When you talk to me, do you mean it... or are you just being polite?",
+    text: "Be honest. If I love you the way I love bread — all the way through — would you let me?",
     backgroundKey: "island",
     spriteExpression: "shy",
     isEnding: false,
-    endingType: null,
-  },
-  {
+  }),
+  line({
     id: "ending_friendship",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "I'm glad we're friends. Come back to the pond anytime—I'll save you a lily pad and a poem.",
+    text: "The fondness never sticks. Hunger does. Sam looks up, and the other three ducks are already around you. They eat you together, and nobody pretends it was love.",
     backgroundKey: "pond_sunset",
-    spriteExpression: "happy",
+    spriteExpression: "neutral",
     isEnding: true,
-    endingType: "friendship",
-  },
-  {
+    endingType: "bad",
+  }),
+  line({
     id: "ending_romance",
     characterId: "breadluvr",
     speaker: "Sam",
-    text: "I think... I more-than-like you. Stay a little longer? The pond feels warmer when you're here.",
+    text: "Sam turns you in the sun until your crust is gold. He is crying and smiling. \"I love you,\" he says, and then he eats you, carefully, like a vow.",
     backgroundKey: "pond_sunset",
     spriteExpression: "love",
     isEnding: true,
-    endingType: "romance",
-  },
+    endingType: "good",
+    minFriendliness: 60,
+  }),
+  ...xanderNodes,
 ];
 
 export const sampleOptions: DialogueOption[] = [
-  {
+  reply({
+    id: "opt_shore_sam",
+    nodeId: "pond_shore",
+    text: "Roll toward the duck in the sun.",
+    nextNodeId: "pond_meet",
+    friendlinessDelta: 0,
+    sortOrder: 0,
+  }),
+  reply({
+    id: "opt_shore_xander",
+    nodeId: "pond_shore",
+    text: "Roll toward the duck at the deep end.",
+    nextNodeId: "xander_deep_end_meet",
+    friendlinessDelta: 0,
+    sortOrder: 1,
+  }),
+  reply({
     id: "opt_approach",
     nodeId: "pond_meet",
-    text: "Approach quietly and say hello.",
+    text: "Roll closer and say hello.",
     nextNodeId: "breadluvr_hello",
-    friendlinessDelta: 5,
-    requiredTier: null,
-    minigameId: null,
+    friendlinessDelta: 6,
     sortOrder: 0,
-  },
-  {
+  }),
+  reply({
     id: "opt_wave",
     nodeId: "pond_meet",
-    text: "Wave from the shore with a big smile.",
+    text: "Wave. Your crust flexes. He makes a small, hungry sound.",
     nextNodeId: "breadluvr_hello",
     friendlinessDelta: 8,
-    requiredTier: null,
-    minigameId: null,
     sortOrder: 1,
-  },
-  {
+  }),
+  reply({
     id: "opt_like_ponds",
     nodeId: "breadluvr_hello",
-    text: "I love quiet ponds. Mind if I join you?",
+    text: "The pond feels safer than the kitchen. Can I stay by you?",
     nextNodeId: "small_talk",
     friendlinessDelta: 12,
-    requiredTier: null,
-    minigameId: null,
     sortOrder: 0,
-  },
-  {
+  }),
+  reply({
     id: "opt_poetry",
     nodeId: "breadluvr_hello",
-    text: "Is that a poetry notebook? I'd love to hear a line.",
+    text: "You look hungry. Should I be worried?",
     nextNodeId: "small_talk",
-    friendlinessDelta: 15,
-    requiredTier: null,
-    minigameId: null,
+    friendlinessDelta: 4,
     sortOrder: 1,
-  },
-  {
+  }),
+  reply({
     id: "opt_awkward",
     nodeId: "breadluvr_hello",
-    text: "Uh... nice weather for ducks?",
+    text: "Please stop looking at me like lunch.",
     nextNodeId: "small_talk",
-    friendlinessDelta: 3,
-    requiredTier: null,
-    minigameId: null,
+    friendlinessDelta: -2,
     sortOrder: 2,
-  },
-  {
+  }),
+  reply({
     id: "opt_not_silly",
     nodeId: "small_talk",
-    text: "It's not silly. Ripples make great metaphors.",
+    text: "That's sweet. And terrifying. I'll stay.",
     nextNodeId: "invite_hop",
     friendlinessDelta: 14,
-    requiredTier: null,
-    minigameId: null,
     sortOrder: 0,
-  },
-  {
+  }),
+  reply({
     id: "opt_encourage",
     nodeId: "small_talk",
-    text: "Write more. I'll be your first reader.",
+    text: "Then stay close. If you're going to love me, I want the gentle version.",
     nextNodeId: "invite_hop",
     friendlinessDelta: 18,
     requiredTier: "acquaintance",
-    minigameId: null,
+    minFriendliness: 20,
     sortOrder: 1,
-  },
-  {
+  }),
+  reply({
     id: "opt_hop_yes",
     nodeId: "invite_hop",
-    text: "Let's hop together! (Lily Pad Hop)",
+    text: "I'll hop. Stay where I can see you.",
     nextNodeId: "after_hop_win",
-    friendlinessDelta: 25,
-    requiredTier: null,
+    friendlinessDelta: 20,
     minigameId: "lily_pad_hop",
     sortOrder: 0,
-  },
-  {
+  }),
+  reply({
     id: "opt_hop_no",
     nodeId: "invite_hop",
-    text: "Maybe another day—let's stay on the shore.",
+    text: "I'm staying on the shore. You can sit. Not nibble.",
     nextNodeId: "after_decline",
-    friendlinessDelta: 5,
-    requiredTier: null,
-    minigameId: null,
+    friendlinessDelta: 2,
     sortOrder: 1,
-  },
-  {
+  }),
+  reply({
     id: "opt_safer",
     nodeId: "after_hop_win",
-    text: "Anytime. I like being here with you.",
+    text: "I like being the one you chose.",
     nextNodeId: "deeper_chat",
-    friendlinessDelta: 20,
-    requiredTier: null,
-    minigameId: null,
+    friendlinessDelta: 16,
     sortOrder: 0,
-  },
-  {
+  }),
+  reply({
     id: "opt_race_heart",
     nodeId: "after_hop_win",
-    text: "Mine too—those pads were slippery!",
+    text: "Your stomach metaphor needs work.",
     nextNodeId: "deeper_chat",
-    friendlinessDelta: 10,
-    requiredTier: null,
-    minigameId: null,
+    friendlinessDelta: 6,
     sortOrder: 1,
-  },
-  {
+  }),
+  reply({
     id: "opt_sit",
     nodeId: "after_decline",
-    text: "Sitting here with you is enough.",
-    nextNodeId: "deeper_chat",
-    friendlinessDelta: 12,
-    requiredTier: null,
-    minigameId: null,
-    sortOrder: 0,
-  },
-  {
-    id: "opt_apologize",
-    nodeId: "after_decline",
-    text: "Sorry—I'm not great with hopping yet.",
+    text: "Sitting is enough. Keep your beak to yourself.",
     nextNodeId: "deeper_chat",
     friendlinessDelta: 8,
-    requiredTier: null,
-    minigameId: null,
+    sortOrder: 0,
+  }),
+  reply({
+    id: "opt_apologize",
+    nodeId: "after_decline",
+    text: "Sorry. The hop looked like a trap.",
+    nextNodeId: "deeper_chat",
+    friendlinessDelta: 4,
     sortOrder: 1,
-  },
-  {
+  }),
+  reply({
     id: "opt_mean_it",
     nodeId: "deeper_chat",
-    text: "I mean every word. You're special to me.",
+    text: "If it's love, then yes. Do it kindly.",
     nextNodeId: "ending_romance",
     friendlinessDelta: 15,
     requiredTier: "crush",
-    minigameId: null,
+    minFriendliness: 60,
     sortOrder: 0,
-  },
-  {
+  }),
+  reply({
     id: "opt_friends",
     nodeId: "deeper_chat",
-    text: "I care about you—as a true friend.",
+    text: "I don't want to be eaten. Not even sweetly.",
     nextNodeId: "ending_friendship",
-    friendlinessDelta: 10,
-    requiredTier: null,
-    minigameId: null,
+    friendlinessDelta: 2,
     sortOrder: 1,
-  },
-  {
+  }),
+  reply({
     id: "opt_honest_warm",
     nodeId: "deeper_chat",
-    text: "I'm honest with you. Always.",
+    text: "I trust you. That still doesn't mean I'm dinner.",
     nextNodeId: "ending_friendship",
     friendlinessDelta: 8,
     requiredTier: "friend",
-    minigameId: null,
+    minFriendliness: 40,
     sortOrder: 2,
-  },
+  }),
+  ...xanderOptions,
 ];
