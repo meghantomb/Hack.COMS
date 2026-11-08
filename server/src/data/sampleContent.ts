@@ -577,7 +577,7 @@ export const samNodes: DialogueNode[] = [
     spriteExpression: "love",
     isEnding: true,
     endingType: "good",
-    minFriendliness: 60,
+    minFriendliness: 80,
   }),
   line(SAM_CONVERSATION_4_ID, {
     id: "ending_bad",
@@ -1297,8 +1297,8 @@ const samOptionsBase: DialogueOption[] = [
     text: "If it's love, then yes. Be gentle.",
     nextNodeId: "ending_romance",
     friendlinessDelta: 15,
-    requiredTier: "crush",
-    minFriendliness: 60,
+    requiredTier: "romance",
+    minFriendliness: 80,
     sortOrder: 0,
   }),
   reply({

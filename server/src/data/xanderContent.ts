@@ -430,7 +430,7 @@ export const xanderNodes: DialogueNode[] = [
     spriteExpression: "love",
     isEnding: true,
     endingType: "good",
-    minFriendliness: 60,
+    minFriendliness: 80,
   }),
   line({
     id: "xander4_ending_bad",
@@ -1040,8 +1040,8 @@ const xanderOptionsBase: DialogueOption[] = [
     text: "I'm with you. Get me out of here.",
     nextNodeId: "xander4_fight",
     friendlinessDelta: 20,
-    requiredTier: "crush",
-    minFriendliness: 60,
+    requiredTier: "romance",
+    minFriendliness: 80,
     sortOrder: 0,
   }),
   reply({
@@ -1066,8 +1066,8 @@ const xanderOptionsBase: DialogueOption[] = [
     text: "Get on the bike with him.",
     nextNodeId: "xander4_ending_romance",
     friendlinessDelta: 15,
-    requiredTier: "crush",
-    minFriendliness: 60,
+    requiredTier: "romance",
+    minFriendliness: 80,
     sortOrder: 0,
   }),
 ];

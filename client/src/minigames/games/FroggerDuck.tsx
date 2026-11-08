@@ -7,6 +7,9 @@ type Car = { x: number; y: number; w: number; dir: number; speed: number };
 /** Five lanes, mixed speeds — usually 2 cars per lane, staggered. */
 function spawnCars(): Car[] {
   return [
+    { x: 300, y: 280, w: 70, dir: 1, speed: 2.3 },
+    { x: 160, y: 280, w: 48, dir: -1, speed: 4.0 },
+    { x: 400, y: 310, w: 58, dir: -1, speed: 4.0 },
     { x: 20, y: 68, w: 54, dir: 1, speed: 1.8 },
     { x: 260, y: 68, w: 48, dir: 1, speed: 1.8 },
     { x: 100, y: 108, w: 62, dir: -1, speed: 3.4 },

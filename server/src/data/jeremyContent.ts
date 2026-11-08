@@ -228,7 +228,7 @@ export const jeremyNodes: DialogueNode[] = [
     backgroundKey: "pond_sunset",
     spriteExpression: "love",
     isEnding: false,
-    minFriendliness: 60,
+    minFriendliness: 80,
   }),
   visit(JEREMY_FIRST_MEETING_ID, {
     id: "jeremy_ending_not_ready",
@@ -502,7 +502,7 @@ export const jeremyNodes: DialogueNode[] = [
     spriteExpression: "love",
     isEnding: true,
     endingType: "good",
-    minFriendliness: 60,
+    minFriendliness: 80,
   }),
   line(JEREMY_LAST_MUSE_ID, {
     id: "jeremy4_ending_eaten",
@@ -1209,6 +1209,8 @@ const jeremyOptionsBase: DialogueOption[] = [
     text: "Then start. I'm not going anywhere.",
     nextNodeId: "jeremy4_ending_muse",
     friendlinessDelta: 15,
+    requiredTier: "romance",
+    minFriendliness: 80,
     sortOrder: 0,
   }),
   reply({
@@ -1217,8 +1219,8 @@ const jeremyOptionsBase: DialogueOption[] = [
     text: "Write as well. I want the poems too.",
     nextNodeId: "jeremy4_ending_muse",
     friendlinessDelta: 16,
-    requiredTier: "crush",
-    minFriendliness: 50,
+    requiredTier: "romance",
+    minFriendliness: 80,
     requiresMinigameWin: true,
     sortOrder: 1,
   }),

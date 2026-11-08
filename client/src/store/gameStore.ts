@@ -4,11 +4,7 @@ import type {
   DialogueOption,
   FriendlinessTier,
 } from "@duck-dating/shared";
-import {
-  DEFAULT_PLAYER_ID,
-  START_NODE_ID,
-  getFriendlinessLabel,
-} from "@duck-dating/shared";
+import { START_NODE_ID, getFriendlinessLabel } from "@duck-dating/shared";
 import {
   fetchProgress,
   fetchStart,
@@ -16,6 +12,7 @@ import {
   resetProgress,
   saveProgress,
 } from "../api/client";
+import { getOrCreatePlayerId } from "../playerId";
 
 
 export type GamePhase =
@@ -58,7 +55,7 @@ function phaseForBundle(bundle: DialogueBundle): GamePhase {
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
-  playerId: DEFAULT_PLAYER_ID,
+  playerId: getOrCreatePlayerId(),
   phase: "title",
   bundle: null,
   pendingOption: null,
