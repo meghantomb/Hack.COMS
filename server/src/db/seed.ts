@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { notInArray } from "drizzle-orm";
+import { notInArray, sql } from "drizzle-orm";
 import { resolve } from "path";
 import { closeDb, getDb, initDb } from "./index";
 
@@ -161,6 +161,24 @@ async function seed() {
         },
       });
   }
+
+  // Sam and Xander both used to share the line id xander_noticed. Xander's line moved.
+  await db.execute(sql`
+    UPDATE player_progress
+    SET current_node_id = 'xander_you_noticed',
+        conversation_id = 'xander_first_meeting'
+    WHERE current_node_id = 'xander_noticed'
+      AND character_id = 'badboy'
+  `);
+  await db.execute(sql`
+    UPDATE player_progress
+    SET bookmarks = jsonb_set(
+      jsonb_set(bookmarks, '{badboy,nodeId}', '"xander_you_noticed"'::jsonb),
+      '{badboy,conversationId}',
+      '"xander_first_meeting"'::jsonb
+    )
+    WHERE bookmarks->'badboy'->>'nodeId' = 'xander_noticed'
+  `);
 
   const optionIds = options.map((opt) => opt.id);
   const nodeIds = nodes.map((node) => node.id);

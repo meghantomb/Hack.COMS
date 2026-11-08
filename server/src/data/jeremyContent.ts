@@ -98,6 +98,18 @@ function visit(conversationId: string, node: Parameters<typeof line>[1]): Dialog
   return line(conversationId, { ...node, isEnding: false, endingType: "bad" });
 }
 
+/** A cold goodbye ends the visit. The pond, and the other ducks, stay open. */
+function shoreExit(fromId: string): DialogueOption {
+  return reply({
+    id: `${fromId}_shore`,
+    nodeId: fromId,
+    text: "Go see who else is on the pond.",
+    nextNodeId: "pond_shore",
+    friendlinessDelta: 0,
+    sortOrder: 0,
+  });
+}
+
 function visitExit(fromId: string, nextId: string, continueText: string): DialogueOption[] {
   return [
     reply({
@@ -222,15 +234,13 @@ export const jeremyNodes: DialogueNode[] = [
     spriteExpression: "sad",
     isEnding: false,
   }),
-  line(JEREMY_FIRST_MEETING_ID, {
+  visit(JEREMY_FIRST_MEETING_ID, {
     id: "jeremy_ending_leave",
     characterId: "artist",
     speaker: "Jeremy",
     text: "Go, then. I won't follow. I'll keep what I already have of you, and know that it is incomplete. That will have to be enough.",
     backgroundKey: "pond_sunset",
     spriteExpression: "neutral",
-    isEnding: true,
-    endingType: "bad",
   }),
   line(JEREMY_SECOND_CANVAS_ID, {
     id: "jeremy2_return",
@@ -324,15 +334,13 @@ export const jeremyNodes: DialogueNode[] = [
     spriteExpression: "sad",
     isEnding: false,
   }),
-  line(JEREMY_SECOND_CANVAS_ID, {
+  visit(JEREMY_SECOND_CANVAS_ID, {
     id: "jeremy2_ending_cool",
     characterId: "artist",
     speaker: "Jeremy",
     text: "I understand. I'll paint what I can from here. If you find the others easier to stand beside, I won't blame you. Ease has never been a color I mix well.",
     backgroundKey: "pond_sunset",
     spriteExpression: "neutral",
-    isEnding: true,
-    endingType: "bad",
   }),
   line(JEREMY_THIRD_LIGHT_ID, {
     id: "jeremy3_dawn",
@@ -426,15 +434,13 @@ export const jeremyNodes: DialogueNode[] = [
     spriteExpression: "sad",
     isEnding: false,
   }),
-  line(JEREMY_THIRD_LIGHT_ID, {
+  visit(JEREMY_THIRD_LIGHT_ID, {
     id: "jeremy3_ending_no",
     characterId: "artist",
     speaker: "Jeremy",
     text: "Then I have asked too far. Forgive the pages. Forgive me for filling the reeds with you. I'll turn them toward the stone, so they face no one.",
     backgroundKey: "pond_sunset",
     spriteExpression: "neutral",
-    isEnding: true,
-    endingType: "bad",
   }),
   line(JEREMY_LAST_MUSE_ID, {
     id: "jeremy4_setup",
@@ -741,6 +747,7 @@ export const jeremyOptions: DialogueOption[] = [
   }),
   ...visitExit("jeremy_ending_sitting", "jeremy2_return", "Come back and let him try the color."),
   ...visitExit("jeremy_ending_not_ready", "jeremy2_return", "Pass the reeds again."),
+  shoreExit("jeremy_ending_leave"),
   reply({
     id: "opt_jeremy2_quiet",
     nodeId: "jeremy2_return",
@@ -951,6 +958,7 @@ export const jeremyOptions: DialogueOption[] = [
   }),
   ...visitExit("jeremy2_ending_yes", "jeremy3_dawn", "Find him again before the day gets hot."),
   ...visitExit("jeremy2_ending_soft", "jeremy3_dawn", "Find him again before the day gets hot."),
+  shoreExit("jeremy2_ending_cool"),
   reply({
     id: "opt_jeremy3_moved",
     nodeId: "jeremy3_dawn",
@@ -1145,6 +1153,7 @@ export const jeremyOptions: DialogueOption[] = [
   }),
   ...visitExit("jeremy3_ending_yes", "jeremy4_setup", "Let him ask you properly."),
   ...visitExit("jeremy3_ending_wait", "jeremy4_setup", "Let him ask you properly."),
+  shoreExit("jeremy3_ending_no"),
   reply({
     id: "opt_jeremy4_place",
     nodeId: "jeremy4_setup",
