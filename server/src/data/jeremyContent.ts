@@ -1266,6 +1266,14 @@ export const jeremyOptions: DialogueOption[] = [
     sortOrder: 2,
   }),
   reply({
+    id: "opt_jeremy4_not_sure",
+    nodeId: "jeremy4_days",
+    text: "I'm not sure I can stay for all of that.",
+    nextNodeId: "jeremy4_ending_eaten",
+    friendlinessDelta: 0,
+    sortOrder: 3,
+  }),
+  reply({
     id: "opt_jeremy4_enough",
     nodeId: "jeremy4_doubt",
     text: "There is enough. Walk the first path with me.",

@@ -42,26 +42,32 @@ export function DialogueBox({
 
   const done = typedLength >= text.length;
   const shown = text.slice(0, typedLength);
+  const measureRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    const el = bodyRef.current;
-    if (!el) return;
+    const el = measureRef.current;
+    const body = bodyRef.current;
+    if (!el || !body) return;
     const { min: minPx, max: maxPx } = bodyFontRange();
     const fit = () => {
       let lo = minPx;
       let hi = maxPx;
       el.style.fontSize = `${hi}px`;
-      if (el.scrollHeight <= el.clientHeight) return;
-      while (hi - lo > 0.5) {
-        const mid = (lo + hi) / 2;
-        el.style.fontSize = `${mid}px`;
-        if (el.scrollHeight <= el.clientHeight) lo = mid;
-        else hi = mid;
+      if (el.scrollHeight > el.clientHeight) {
+        while (hi - lo > 0.5) {
+          const mid = (lo + hi) / 2;
+          el.style.fontSize = `${mid}px`;
+          if (el.scrollHeight <= el.clientHeight) lo = mid;
+          else hi = mid;
+        }
+        el.style.fontSize = `${lo}px`;
       }
-      el.style.fontSize = `${lo}px`;
+      body.style.fontSize = el.style.fontSize;
     };
     fit();
-  }, [shown]);
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [text]);
 
   return (
     <button
@@ -77,13 +83,23 @@ export function DialogueBox({
       <div className="shrink-0 font-display text-base text-ui-cream sm:text-lg lg:text-xl xl:text-2xl">
         {speaker}
       </div>
-      <p
-        ref={bodyRef}
-        className="mt-1 min-h-0 flex-1 overflow-hidden font-story font-bold leading-snug text-white sm:mt-2"
-      >
-        {shown}
-        {!done && <span className="caret">▌</span>}
-      </p>
+      <div className="relative mt-1 min-h-0 flex-1 sm:mt-2">
+        <p
+          ref={measureRef}
+          aria-hidden
+          className="invisible absolute inset-0 overflow-hidden font-story font-bold leading-snug"
+        >
+          {text}
+          <span className="caret">▌</span>
+        </p>
+        <p
+          ref={bodyRef}
+          className="absolute inset-0 overflow-hidden font-story font-bold leading-snug text-white"
+        >
+          {shown}
+          {!done && <span className="caret">▌</span>}
+        </p>
+      </div>
     </button>
   );
 }
