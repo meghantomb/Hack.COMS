@@ -14,7 +14,9 @@ import {
   fetchStart,
   postChoice,
   resetProgress,
+  saveProgress,
 } from "../api/client";
+
 
 export type GamePhase =
   | "title"
@@ -45,6 +47,7 @@ interface GameState {
   setTypedLength: (n: number) => void;
   restart: () => Promise<void>;
   goToTitle: () => Promise<void>;
+  saveAndQuitToTitle: () => Promise<void>;
   friendlinessLabel: () => string;
 }
 
@@ -72,12 +75,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ phase: "title", error: null, bundle: null, pendingOption: null });
     try {
       const progress = await fetchProgress(get().playerId);
-      const canContinue = progress.currentNodeId !== START_NODE_ID;
+      const canContinue =
+        progress.currentNodeId !== START_NODE_ID ||
+        progress.flags?.hasSave === true;
       set({ canContinue });
     } catch {
       set({ canContinue: false });
     }
   },
+
 
   startNewGame: async () => {
     // Enter intro immediately from the click so the video can autoplay.
@@ -203,6 +209,34 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   goToTitle: async () => {
     await get().prepareTitle();
+  },
+
+  saveAndQuitToTitle: async () => {
+    const { bundle, playerId } = get();
+    if (!bundle) {
+      await get().prepareTitle();
+      return;
+    }
+    try {
+      await saveProgress({
+        playerId,
+        currentNodeId: bundle.node.id,
+        characterId: bundle.character.id,
+        flags: { hasSave: true },
+      });
+      set({
+        phase: "title",
+        bundle: null,
+        pendingOption: null,
+        error: null,
+        canContinue: true,
+        typedLength: 0,
+      });
+    } catch (e) {
+      set({
+        error: e instanceof Error ? e.message : "Could not save progress",
+      });
+    }
   },
 
   restart: async () => {

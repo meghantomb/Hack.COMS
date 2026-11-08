@@ -25,6 +25,7 @@ export default function App() {
   const load = useGameStore((s) => s.load);
   const restart = useGameStore((s) => s.restart);
   const goToTitle = useGameStore((s) => s.goToTitle);
+  const saveAndQuitToTitle = useGameStore((s) => s.saveAndQuitToTitle);
 
   useEffect(() => {
     void prepareTitle();
@@ -92,6 +93,7 @@ export default function App() {
         layout={layout}
         meters={bundle.loveMeters}
         onRestart={() => void restart()}
+        onSaveAndQuit={() => void saveAndQuitToTitle()}
       />
 
       {(phase === "dialogue" || phase === "ending") && (

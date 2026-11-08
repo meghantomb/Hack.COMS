@@ -62,3 +62,20 @@ export function fetchProgress(playerId = DEFAULT_PLAYER_ID) {
     `/api/progress/${encodeURIComponent(playerId)}`
   );
 }
+
+export function saveProgress(body: {
+  playerId?: string;
+  currentNodeId: string;
+  characterId: string;
+  flags?: Record<string, boolean>;
+}) {
+  return request<PlayerProgress>("/api/progress/save", {
+    method: "POST",
+    body: JSON.stringify({
+      playerId: body.playerId ?? DEFAULT_PLAYER_ID,
+      currentNodeId: body.currentNodeId,
+      characterId: body.characterId,
+      flags: body.flags ?? {},
+    }),
+  });
+}
