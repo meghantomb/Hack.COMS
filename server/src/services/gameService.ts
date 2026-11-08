@@ -8,11 +8,13 @@ import {
   DUCK_CHARACTER_IDS,
   SAMPLE_CHARACTER_ID,
   START_NODE_ID,
-  advanceConversation,
+  applyChoiceProgress,
   getFriendlinessTier,
   hasClearedMinigame,
   minigameFlag,
   optionIsAvailable,
+  readBookmarks,
+  rememberDuckPlace,
   type AiDialogueOption,
   type ChoiceResult,
   type DialogueBundle,
@@ -48,7 +50,32 @@ function toNode(row: typeof schema.dialogueNodes.$inferSelect): DialogueNode {
   };
 }
 
+/** Show the closest wording of this beat that the player's closeness has earned. */
+function selectVariantNode(
+  current: DialogueNode,
+  candidates: DialogueNode[],
+  friendliness: number
+): DialogueNode {
+  if (!current.variantGroup) return current;
+  let best: DialogueNode | null = null;
+  for (const node of candidates) {
+    if (node.conversationId !== current.conversationId) continue;
+    if (node.variantGroup !== current.variantGroup) continue;
+    if (friendliness < node.minFriendliness) continue;
+    if (!best || node.minFriendliness > best.minFriendliness) best = node;
+  }
+  return best ?? current;
+}
+
 function stageFor(node: DialogueNode): StagePresence[] | undefined {
+  if (node.id === START_NODE_ID) {
+    return [
+      { characterId: "badboy", side: "left" },
+      { characterId: "jock", side: "left" },
+      { characterId: "breadluvr", side: "right" },
+      { characterId: "artist", side: "right" },
+    ];
+  }
   if (!node.guestCharacterId) return undefined;
   return [
     { characterId: node.guestCharacterId, side: "left" },
@@ -93,7 +120,13 @@ export async function ensurePlayer(playerId = DEFAULT_PLAYER_ID) {
       consecutiveConversations: 0,
       endingType: "bad",
       flags: {},
+      bookmarks: {},
     });
+  } else if (existingProg[0].bookmarks == null) {
+    await db
+      .update(schema.playerProgress)
+      .set({ bookmarks: {} })
+      .where(eq(schema.playerProgress.playerId, playerId));
   }
 }
 
@@ -123,6 +156,7 @@ export async function resetPlayer(playerId = DEFAULT_PLAYER_ID) {
       consecutiveConversations: 0,
       endingType: "bad",
       flags: {},
+      bookmarks: {},
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
@@ -135,6 +169,7 @@ export async function resetPlayer(playerId = DEFAULT_PLAYER_ID) {
         consecutiveConversations: 0,
         endingType: "bad",
         flags: {},
+        bookmarks: {},
         updatedAt: new Date(),
       },
     });
@@ -202,7 +237,19 @@ export async function getDialogueBundle(
 
   const friendliness = rel?.friendliness ?? 0;
   const tier = getFriendlinessTier(friendliness);
-  const spoken = toNode(node);
+  let spoken = toNode(node);
+  if (spoken.variantGroup && spoken.conversationId) {
+    const siblingRows = await db
+      .select()
+      .from(schema.dialogueNodes)
+      .where(
+        and(
+          eq(schema.dialogueNodes.conversationId, spoken.conversationId),
+          eq(schema.dialogueNodes.variantGroup, spoken.variantGroup)
+        )
+      );
+    spoken = selectVariantNode(spoken, siblingRows.map(toNode), friendliness);
+  }
 
   const [progressRow] = await db
     .select()
@@ -221,7 +268,7 @@ export async function getDialogueBundle(
   const allOptions = await db
     .select()
     .from(schema.dialogueOptions)
-    .where(eq(schema.dialogueOptions.nodeId, nodeId));
+    .where(eq(schema.dialogueOptions.nodeId, spoken.id));
 
   const nextIds = [...new Set(allOptions.map((o) => o.nextNodeId))];
   const nextRows = nextIds.length
@@ -403,31 +450,46 @@ export async function applyChoice(
     };
   }
 
-  const next = Math.max(0, Math.min(100, friendliness + option.friendlinessDelta));
+  const bookmarks = readBookmarks(progressRow?.bookmarks);
+  const savedMark = node.id === START_NODE_ID ? bookmarks[nextNode.characterId] : undefined;
+  let resumeNode: DialogueNode | null = null;
+  if (savedMark) {
+    const [savedRow] = await db
+      .select()
+      .from(schema.dialogueNodes)
+      .where(eq(schema.dialogueNodes.id, savedMark.nodeId))
+      .limit(1);
+    resumeNode = savedRow ? toNode(savedRow) : null;
+  }
 
-  await db
-    .insert(schema.relationships)
-    .values({
-      playerId,
-      characterId: node.characterId,
-      friendliness: next,
-    })
-    .onConflictDoUpdate({
-      target: [schema.relationships.playerId, schema.relationships.characterId],
-      set: { friendliness: next },
-    });
-
-  const moved = advanceConversation({
-    exchangeCount: progressRow?.exchangeCount ?? 0,
-    consecutiveConversations: progressRow?.consecutiveConversations ?? 0,
-    endingType: asEnding(progressRow?.endingType),
-    currentConversationId: node.conversationId,
-    currentCharacterId: node.characterId,
-    nextConversationId: nextNode.conversationId,
-    nextCharacterId: nextNode.characterId,
-    nextIsEnding: nextNode.isEnding,
-    nextEndingType: nextNode.endingType,
+  const moved = applyChoiceProgress({
+    fromNodeId: node.id,
+    fromCharacterId: node.characterId,
+    fromConversationId: node.conversationId,
+    scriptedNext: nextNode,
+    resumeNode,
+    progress: {
+      exchangeCount: progressRow?.exchangeCount ?? 0,
+      consecutiveConversations: progressRow?.consecutiveConversations ?? 0,
+      endingType: asEnding(progressRow?.endingType),
+      bookmarks,
+    },
   });
+
+  const nextScore = Math.max(0, Math.min(100, friendliness + option.friendlinessDelta));
+  if (!moved.resumed) {
+    await db
+      .insert(schema.relationships)
+      .values({
+        playerId,
+        characterId: node.characterId,
+        friendliness: nextScore,
+      })
+      .onConflictDoUpdate({
+        target: [schema.relationships.playerId, schema.relationships.characterId],
+        set: { friendliness: nextScore },
+      });
+  }
 
   const flags = { ...((progressRow?.flags as Record<string, boolean> | null) ?? {}) };
   if (option.minigameId && minigameWon) flags[minigameFlag(option.minigameId)] = true;
@@ -436,34 +498,37 @@ export async function applyChoice(
     .insert(schema.playerProgress)
     .values({
       playerId,
-      currentNodeId: option.nextNodeId,
-      characterId: nextNode.characterId,
+      currentNodeId: moved.currentNodeId,
+      characterId: moved.characterId,
       conversationId: moved.conversationId,
       exchangeCount: moved.exchangeCount,
       consecutiveConversations: moved.consecutiveConversations,
       endingType: moved.endingType,
       flags,
+      bookmarks: moved.bookmarks,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: schema.playerProgress.playerId,
       set: {
-        currentNodeId: option.nextNodeId,
-        characterId: nextNode.characterId,
+        currentNodeId: moved.currentNodeId,
+        characterId: moved.characterId,
         conversationId: moved.conversationId,
         exchangeCount: moved.exchangeCount,
         consecutiveConversations: moved.consecutiveConversations,
         endingType: moved.endingType,
         flags,
+        bookmarks: moved.bookmarks,
         updatedAt: new Date(),
       },
     });
 
+  const reported = moved.resumed ? friendliness : nextScore;
   return {
     success: true,
-    friendliness: next,
-    tier: getFriendlinessTier(next),
-    nextNodeId: option.nextNodeId,
+    friendliness: reported,
+    tier: getFriendlinessTier(reported),
+    nextNodeId: moved.currentNodeId,
     unlocked: true,
   };
 }
@@ -491,6 +556,16 @@ export async function saveProgress(
   const node = nodeRow ? toNode(nodeRow) : null;
   const endingType = node?.isEnding ? node.endingType : asEnding(existing?.endingType);
   const conversationId = node?.conversationId ?? existing?.conversationId ?? null;
+  let bookmarks = readBookmarks(existing?.bookmarks);
+  if (node && node.id !== START_NODE_ID) {
+    bookmarks = rememberDuckPlace(bookmarks, {
+      nodeId: node.id,
+      characterId: node.characterId,
+      conversationId: node.conversationId,
+      exchangeCount: existing?.exchangeCount ?? 0,
+      consecutiveConversations: existing?.consecutiveConversations ?? 0,
+    });
+  }
 
   await db
     .insert(schema.playerProgress)
@@ -503,6 +578,7 @@ export async function saveProgress(
       consecutiveConversations: existing?.consecutiveConversations ?? 0,
       endingType,
       flags,
+      bookmarks,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
@@ -513,6 +589,7 @@ export async function saveProgress(
         conversationId,
         endingType,
         flags,
+        bookmarks,
         updatedAt: new Date(),
       },
     });
@@ -526,6 +603,7 @@ export async function saveProgress(
     consecutiveConversations: existing?.consecutiveConversations ?? 0,
     endingType,
     flags,
+    bookmarks,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -553,6 +631,7 @@ export async function getProgress(
     consecutiveConversations: row.consecutiveConversations ?? 0,
     endingType: asEnding(row.endingType),
     flags: (row.flags as Record<string, boolean>) ?? {},
+    bookmarks: readBookmarks(row.bookmarks),
     updatedAt: row.updatedAt.toISOString(),
   };
 }

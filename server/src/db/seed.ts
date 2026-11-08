@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { notInArray } from "drizzle-orm";
 import { resolve } from "path";
 import { closeDb, getDb, initDb } from "./index";
 
@@ -163,6 +164,20 @@ async function seed() {
       });
   }
 
+  const optionIds = options.map((opt) => opt.id);
+  const nodeIds = nodes.map((node) => node.id);
+  await db.delete(schema.dialogueOptions).where(notInArray(schema.dialogueOptions.id, optionIds));
+  await db
+    .update(schema.playerProgress)
+    .set({
+      currentNodeId: START_NODE_ID,
+      conversationId: null,
+      exchangeCount: 0,
+      consecutiveConversations: 0,
+    })
+    .where(notInArray(schema.playerProgress.currentNodeId, nodeIds));
+  await db.delete(schema.dialogueNodes).where(notInArray(schema.dialogueNodes.id, nodeIds));
+
   for (const characterId of DUCK_CHARACTER_IDS) {
     await db
       .insert(schema.relationships)
@@ -185,6 +200,7 @@ async function seed() {
       consecutiveConversations: 0,
       endingType: "bad",
       flags: {},
+      bookmarks: {},
     })
     .onConflictDoNothing();
 

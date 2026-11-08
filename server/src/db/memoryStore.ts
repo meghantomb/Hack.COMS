@@ -3,8 +3,10 @@ import {
   DUCK_CHARACTER_IDS,
   SAMPLE_CHARACTER_ID,
   START_NODE_ID,
-  advanceConversation,
+  applyChoiceProgress,
   getFriendlinessTier,
+  readBookmarks,
+  rememberDuckPlace,
   minigameFlag,
   hasClearedMinigame,
   optionIsAvailable,
@@ -19,16 +21,28 @@ import {
   type PlayerProgress,
   type StagePresence,
 } from "@duck-dating/shared";
-import {
-  sampleConversations,
-  sampleMinigames,
-  sampleNodes,
-  sampleOptions,
-} from "../data/duckScripts";
-import { sampleCharacters } from "../data/sampleContent";
+import * as content from "../data/sampleContent";
+import * as scripts from "../data/duckScripts";
 
 function clone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v)) as T;
+}
+
+/** Show the closest wording of this beat that the player's closeness has earned. */
+function selectVariantNode(
+  current: DialogueNode,
+  candidates: DialogueNode[],
+  friendliness: number
+): DialogueNode {
+  if (!current.variantGroup) return current;
+  let best: DialogueNode | null = null;
+  for (const node of candidates) {
+    if (node.conversationId !== current.conversationId) continue;
+    if (node.variantGroup !== current.variantGroup) continue;
+    if (friendliness < node.minFriendliness) continue;
+    if (!best || node.minFriendliness > best.minFriendliness) best = node;
+  }
+  return best ?? current;
 }
 
 function freshProgress(playerId: string, flags: Record<string, boolean> = {}): PlayerProgress {
@@ -41,22 +55,37 @@ function freshProgress(playerId: string, flags: Record<string, boolean> = {}): P
     consecutiveConversations: 0,
     endingType: "bad",
     flags,
+    bookmarks: {},
     updatedAt: new Date().toISOString(),
   };
 }
 
 export class MemoryStore {
-  characters = new Map<string, Character>(
-    sampleCharacters.map((c) => [c.id, clone(c)])
-  );
-  conversations = new Map<string, Conversation>(
-    sampleConversations.map((c) => [c.id, clone(c)])
-  );
-  nodes = new Map<string, DialogueNode>(sampleNodes.map((n) => [n.id, clone(n)]));
-  options = new Map<string, DialogueOption>(sampleOptions.map((o) => [o.id, clone(o)]));
-  minigames = new Map<string, Minigame>(sampleMinigames.map((game) => [game.id, clone(game)]));
+  characters = new Map<string, Character>();
+  conversations = new Map<string, Conversation>();
+  nodes = new Map<string, DialogueNode>();
+  options = new Map<string, DialogueOption>();
+  minigames = new Map<string, Minigame>();
   relationships = new Map<string, number>();
   progress = new Map<string, PlayerProgress>();
+  private hydrated = false;
+
+  /** Read dialogue after every module has finished loading. A hot reload can construct this store mid-import. */
+  private hydrate() {
+    if (this.hydrated) return;
+    const characters = content.sampleCharacters;
+    const conversations = scripts.sampleConversations;
+    const nodes = scripts.sampleNodes;
+    const options = scripts.sampleOptions;
+    const minigames = scripts.sampleMinigames;
+    if (!characters || !conversations || !nodes || !options || !minigames) return;
+    this.hydrated = true;
+    for (const character of characters) this.characters.set(character.id, clone(character));
+    for (const conversation of conversations) this.conversations.set(conversation.id, clone(conversation));
+    for (const node of nodes) this.nodes.set(node.id, clone(node));
+    for (const option of options) this.options.set(option.id, clone(option));
+    for (const game of minigames) this.minigames.set(game.id, clone(game));
+  }
 
   private relKey(playerId: string, characterId: string) {
     return `${playerId}::${characterId}`;
@@ -74,6 +103,14 @@ export class MemoryStore {
   }
 
   private stageFor(node: DialogueNode): StagePresence[] | undefined {
+    if (node.id === START_NODE_ID) {
+      return [
+        { characterId: "badboy", side: "left" },
+        { characterId: "jock", side: "left" },
+        { characterId: "breadluvr", side: "right" },
+        { characterId: "artist", side: "right" },
+      ];
+    }
     if (!node.guestCharacterId) return undefined;
     return [
       { characterId: node.guestCharacterId, side: "left" },
@@ -85,19 +122,21 @@ export class MemoryStore {
     nodeId: string,
     playerId = DEFAULT_PLAYER_ID
   ): Promise<DialogueBundle | null> {
+    this.hydrate();
     const node = this.nodes.get(nodeId);
     if (!node) return null;
-    const character = this.characters.get(node.characterId);
+    const friendliness = this.getFriendliness(playerId, node.characterId);
+    const spoken = selectVariantNode(node, [...this.nodes.values()], friendliness);
+    const character = this.characters.get(spoken.characterId);
     if (!character) return null;
 
-    const friendliness = this.getFriendliness(playerId, node.characterId);
     const tier = getFriendlinessTier(friendliness);
     const progress = this.progress.get(playerId) ?? freshProgress(playerId);
     const maxExchanges =
-      (node.conversationId && this.conversations.get(node.conversationId)?.maxExchanges) || 20;
+      (spoken.conversationId && this.conversations.get(spoken.conversationId)?.maxExchanges) || 20;
 
     const options = [...this.options.values()]
-      .filter((o) => o.nodeId === nodeId)
+      .filter((o) => o.nodeId === spoken.id)
       .filter((o) => {
         const next = this.nodes.get(o.nextNodeId);
         return optionIsAvailable({
@@ -109,7 +148,7 @@ export class MemoryStore {
           nextMinFriendliness: next?.minFriendliness ?? 0,
           friendliness,
           tier,
-          staysInConversation: (next?.conversationId ?? null) === node.conversationId,
+          staysInConversation: (next?.conversationId ?? null) === spoken.conversationId,
           exchangeCount: progress.exchangeCount,
           maxExchanges,
           consecutiveConversations: progress.consecutiveConversations,
@@ -118,17 +157,18 @@ export class MemoryStore {
       .sort((a, b) => a.sortOrder - b.sortOrder);
 
     return {
-      node,
+      node: spoken,
       options,
       character,
       friendliness,
       tier,
       loveMeters: this.getLoveMeters(playerId),
-      onStage: this.stageFor(node),
+      onStage: this.stageFor(spoken),
     };
   }
 
   getLoveMeters(playerId: string): LoveMeter[] {
+    this.hydrate();
     return DUCK_CHARACTER_IDS.map((id) => {
       const c = this.characters.get(id);
       return {
@@ -145,6 +185,7 @@ export class MemoryStore {
     optionId: string,
     minigameWon?: boolean
   ): Promise<ChoiceResult> {
+    this.hydrate();
     const option = this.options.get(optionId);
     if (!option) {
       return {
@@ -213,41 +254,55 @@ export class MemoryStore {
       };
     }
 
-    const next = Math.max(0, Math.min(100, friendliness + option.friendlinessDelta));
-    this.setFriendliness(playerId, node.characterId, next);
+    const bookmarks = readBookmarks(progress.bookmarks);
+    const saved =
+      node.id === START_NODE_ID ? bookmarks[nextNode.characterId] : undefined;
+    const resumeNode =
+      saved && this.nodes.get(saved.nodeId)
+        ? this.nodes.get(saved.nodeId)!
+        : null;
 
-    const moved = advanceConversation({
-      exchangeCount: progress.exchangeCount,
-      consecutiveConversations: progress.consecutiveConversations,
-      endingType: progress.endingType,
-      currentConversationId: node.conversationId,
-      currentCharacterId: node.characterId,
-      nextConversationId: nextNode.conversationId,
-      nextCharacterId: nextNode.characterId,
-      nextIsEnding: nextNode.isEnding,
-      nextEndingType: nextNode.endingType,
+    const moved = applyChoiceProgress({
+      fromNodeId: node.id,
+      fromCharacterId: node.characterId,
+      fromConversationId: node.conversationId,
+      scriptedNext: nextNode,
+      resumeNode,
+      progress: {
+        exchangeCount: progress.exchangeCount,
+        consecutiveConversations: progress.consecutiveConversations,
+        endingType: progress.endingType,
+        bookmarks,
+      },
     });
+
+    const nextScore = Math.max(0, Math.min(100, friendliness + option.friendlinessDelta));
+    if (!moved.resumed) {
+      this.setFriendliness(playerId, node.characterId, nextScore);
+    }
 
     const flags = { ...progress.flags };
     if (option.minigameId && minigameWon) flags[minigameFlag(option.minigameId)] = true;
 
     this.progress.set(playerId, {
       playerId,
-      currentNodeId: option.nextNodeId,
-      characterId: nextNode.characterId,
+      currentNodeId: moved.currentNodeId,
+      characterId: moved.characterId,
       conversationId: moved.conversationId,
       exchangeCount: moved.exchangeCount,
       consecutiveConversations: moved.consecutiveConversations,
       endingType: moved.endingType,
+      bookmarks: moved.bookmarks,
       flags,
       updatedAt: new Date().toISOString(),
     });
 
+    const reported = moved.resumed ? friendliness : nextScore;
     return {
       success: true,
-      friendliness: next,
-      tier: getFriendlinessTier(next),
-      nextNodeId: option.nextNodeId,
+      friendliness: reported,
+      tier: getFriendlinessTier(reported),
+      nextNodeId: moved.currentNodeId,
       unlocked: true,
     };
   }
@@ -258,8 +313,19 @@ export class MemoryStore {
     characterId: string,
     flags: Record<string, boolean> = {}
   ): Promise<PlayerProgress> {
+    this.hydrate();
     const existing = this.progress.get(playerId) ?? freshProgress(playerId);
     const node = this.nodes.get(currentNodeId);
+    let bookmarks = readBookmarks(existing.bookmarks);
+    if (node && node.id !== START_NODE_ID) {
+      bookmarks = rememberDuckPlace(bookmarks, {
+        nodeId: node.id,
+        characterId: node.characterId,
+        conversationId: node.conversationId,
+        exchangeCount: existing.exchangeCount,
+        consecutiveConversations: existing.consecutiveConversations,
+      });
+    }
     const progress: PlayerProgress = {
       ...existing,
       playerId,
@@ -267,6 +333,7 @@ export class MemoryStore {
       characterId,
       conversationId: node?.conversationId ?? existing.conversationId,
       endingType: node?.isEnding ? node.endingType : existing.endingType,
+      bookmarks,
       flags,
       updatedAt: new Date().toISOString(),
     };
@@ -279,17 +346,22 @@ export class MemoryStore {
   }
 
   async ensurePlayer(playerId = DEFAULT_PLAYER_ID) {
+    this.hydrate();
     for (const id of DUCK_CHARACTER_IDS) {
       if (!this.relationships.has(this.relKey(playerId, id))) {
         this.setFriendliness(playerId, id, 0);
       }
     }
-    if (!this.progress.has(playerId)) {
+    const existing = this.progress.get(playerId);
+    if (!existing) {
       this.progress.set(playerId, freshProgress(playerId));
+    } else if (!existing.bookmarks) {
+      existing.bookmarks = {};
     }
   }
 
   async resetPlayer(playerId = DEFAULT_PLAYER_ID) {
+    this.hydrate();
     for (const id of DUCK_CHARACTER_IDS) {
       this.setFriendliness(playerId, id, 0);
     }
@@ -300,6 +372,7 @@ export class MemoryStore {
     nodeId: string,
     texts: { text: string; friendlinessDelta: number }[]
   ): Promise<DialogueOption[]> {
+    this.hydrate();
     const created: DialogueOption[] = [];
     const existing = [...this.options.values()].filter((o) => o.nodeId === nodeId);
     let sort = existing.length;
@@ -330,10 +403,12 @@ export class MemoryStore {
   }
 
   getCharacter(id: string) {
+    this.hydrate();
     return this.characters.get(id) ?? null;
   }
 
   getMinigame(id: string) {
+    this.hydrate();
     return this.minigames.get(id) ?? null;
   }
 }

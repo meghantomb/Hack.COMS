@@ -135,6 +135,7 @@ CREATE TABLE IF NOT EXISTS player_progress (
   consecutive_conversations INTEGER NOT NULL DEFAULT 0,
   ending_type TEXT NOT NULL DEFAULT 'bad' CHECK (ending_type IN ('good', 'bad')),
   flags JSONB NOT NULL DEFAULT '{}'::jsonb,
+  bookmarks JSONB NOT NULL DEFAULT '{}'::jsonb,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 `;

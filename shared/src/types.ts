@@ -98,6 +98,16 @@ export interface Relationship {
   friendliness: number;
 }
 
+/** Where a duck was when the player left them. The shore is never stored here. */
+export interface ConversationBookmark {
+  nodeId: string;
+  conversationId: string | null;
+  exchangeCount: number;
+  consecutiveConversations: number;
+}
+
+export type ConversationBookmarks = Record<string, ConversationBookmark>;
+
 export interface PlayerProgress {
   playerId: string;
   currentNodeId: string;
@@ -110,6 +120,8 @@ export interface PlayerProgress {
   /** Stays bad until a good ending node changes it. */
   endingType: EndingType;
   flags: Record<string, boolean>;
+  /** Last real line for each duck, keyed by that scene's character id. */
+  bookmarks: ConversationBookmarks;
   updatedAt: string;
 }
 

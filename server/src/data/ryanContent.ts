@@ -18,28 +18,28 @@ export const ryanConversations: Conversation[] = [
     characterId: "jock",
     title: "Ryan at the pond",
     sortOrder: 0,
-    maxExchanges: 20,
+    maxExchanges: 10,
   },
   {
     id: RYAN_TRAINING_ID,
     characterId: "jock",
     title: "Ryan's training plan",
     sortOrder: 1,
-    maxExchanges: 20,
+    maxExchanges: 10,
   },
   {
     id: RYAN_CROWD_ID,
     characterId: "jock",
     title: "Ryan saves a seat",
     sortOrder: 2,
-    maxExchanges: 20,
+    maxExchanges: 10,
   },
   {
     id: RYAN_FINALE_ID,
     characterId: "jock",
     title: "Ryan's offer",
     sortOrder: 3,
-    maxExchanges: 20,
+    maxExchanges: 10,
   },
 ];
 
@@ -91,8 +91,31 @@ function reply(
   };
 }
 
+function visitExit(fromId: string, nextId: string, continueText: string): DialogueOption[] {
+  return [
+    reply({
+      id: `${fromId}_keep`,
+      nodeId: fromId,
+      text: continueText,
+      nextNodeId: nextId,
+      friendlinessDelta: 0,
+      continuesConversation: true,
+      sortOrder: 0,
+    }),
+    reply({
+      id: `${fromId}_shore`,
+      nodeId: fromId,
+      text: "Go see who else is on the pond.",
+      nextNodeId: "pond_shore",
+      friendlinessDelta: 0,
+      sortOrder: 1,
+    }),
+  ];
+}
+
 export const ryanNodes: DialogueNode[] = [
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_pond_meet",
     characterId: "jock",
     speaker: "Narrator",
@@ -102,6 +125,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_hello",
     characterId: "jock",
     speaker: "Ryan",
@@ -111,6 +135,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_small_talk",
     characterId: "jock",
     speaker: "Ryan",
@@ -120,6 +145,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_invite_race",
     characterId: "jock",
     speaker: "Ryan",
@@ -129,6 +155,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_after_win",
     characterId: "jock",
     speaker: "Ryan",
@@ -138,6 +165,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_after_decline",
     characterId: "jock",
     speaker: "Ryan",
@@ -147,6 +175,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_deeper",
     characterId: "jock",
     speaker: "Ryan",
@@ -156,6 +185,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_wrap_warm",
     characterId: "jock",
     speaker: "Ryan",
@@ -165,6 +195,7 @@ export const ryanNodes: DialogueNode[] = [
     isEnding: false,
   }),
   line({
+    conversationId: RYAN_FIRST_MEETING_ID,
     id: "ryan_wrap_guarded",
     characterId: "jock",
     speaker: "Ryan",
@@ -408,28 +439,6 @@ export const ryanNodes: DialogueNode[] = [
     endingType: "bad",
   }),
 ];
-
-function visitExit(fromId: string, nextId: string, continueText: string): DialogueOption[] {
-  return [
-    reply({
-      id: `${fromId}_keep`,
-      nodeId: fromId,
-      text: continueText,
-      nextNodeId: nextId,
-      friendlinessDelta: 0,
-      continuesConversation: true,
-      sortOrder: 0,
-    }),
-    reply({
-      id: `${fromId}_shore`,
-      nodeId: fromId,
-      text: "Go see who else is on the pond.",
-      nextNodeId: "pond_shore",
-      friendlinessDelta: 0,
-      sortOrder: 1,
-    }),
-  ];
-}
 
 export const ryanOptions: DialogueOption[] = [
   reply({

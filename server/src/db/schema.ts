@@ -7,6 +7,7 @@ import {
   boolean,
   primaryKey,
 } from "drizzle-orm/pg-core";
+import type { ConversationBookmarks } from "@duck-dating/shared";
 
 export const characters = pgTable("characters", {
   id: text("id").primaryKey(),
@@ -98,5 +99,6 @@ export const playerProgress = pgTable("player_progress", {
   consecutiveConversations: integer("consecutive_conversations").notNull().default(0),
   endingType: text("ending_type").notNull().default("bad"),
   flags: jsonb("flags").$type<Record<string, boolean>>().notNull().default({}),
+  bookmarks: jsonb("bookmarks").$type<ConversationBookmarks>().notNull().default({}),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
