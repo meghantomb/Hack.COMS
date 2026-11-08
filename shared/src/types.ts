@@ -172,6 +172,8 @@ export interface ChoiceResult {
   tier: FriendlinessTier;
   nextNodeId: string | null;
   unlocked: boolean;
+  /** Latest save flags after the choice (minigame wins, cooldown, etc.). */
+  flags?: Record<string, boolean>;
 }
 
 export interface ProgressSaveRequest {

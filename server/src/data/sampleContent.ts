@@ -1322,9 +1322,17 @@ const samOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Bread Snake. Later ids stay bread_snake; the client picks the random pool after that win. */
-/** Quiet high-boost launchers — one optional beat per later visit. */
+/** Quiet high-boost launchers — a few story beats per visit (plus authored invite_hop). */
 export const samOptions: DialogueOption[] = attachMinigameChoices(samOptionsBase, "bread_snake", [
+  "pond_meet",
+  "small_talk",
+  "after_decline",
   "c2_hello",
+  "c2_practice",
+  "c2_ask",
   "c3_arrive",
+  "c3_honest",
+  "c3_ask",
   "c4_hello",
+  "c4_others",
 ]);

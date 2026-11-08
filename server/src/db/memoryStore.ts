@@ -8,7 +8,6 @@ import {
   getFriendlinessTier,
   readBookmarks,
   rememberDuckPlace,
-  minigameFlag,
   recordMinigameWinFlags,
   clearMinigameCooldown,
   hasClearedMinigame,
@@ -300,12 +299,12 @@ export class MemoryStore {
     let flags: Record<string, boolean> = { ...progress.flags, hasSave: true };
     if (option.minigameId && minigameWon) {
       const played = playedMinigameId ?? option.minigameId;
+      // Record the game actually played (signature or random) — not the dialogue option's placeholder id.
       flags = {
         ...recordMinigameWinFlags(flags, {
           playedMinigameId: played,
           characterId: node.characterId,
         }),
-        [minigameFlag(option.minigameId)]: true,
         hasSave: true,
       };
     } else if (!option.minigameId) {
@@ -332,6 +331,7 @@ export class MemoryStore {
       tier: getFriendlinessTier(reported),
       nextNodeId: moved.currentNodeId,
       unlocked: true,
+      flags,
     };
   }
 

@@ -14,7 +14,6 @@ import {
   clearMinigameCooldown,
   hasClearedMinigame,
   hasMinigameCooldown,
-  minigameFlag,
   recordMinigameWinFlags,
   optionIsAvailable,
   readBookmarks,
@@ -537,12 +536,12 @@ export async function applyChoice(
   };
   if (option.minigameId && minigameWon) {
     const played = playedMinigameId ?? option.minigameId;
+    // Record the game actually played (signature or random) — not the dialogue option's placeholder id.
     flags = {
       ...recordMinigameWinFlags(flags, {
         playedMinigameId: played,
         characterId: node.characterId,
       }),
-      [minigameFlag(option.minigameId)]: true,
       hasSave: true,
     };
   } else if (!option.minigameId) {
@@ -585,6 +584,7 @@ export async function applyChoice(
     tier: getFriendlinessTier(reported),
     nextNodeId: moved.currentNodeId,
     unlocked: true,
+    flags,
   };
 }
 

@@ -87,6 +87,17 @@ export function signatureMinigameFor(characterId: string): SignatureMinigameId |
   return SIGNATURE_BY_CHARACTER[characterId];
 }
 
+/** True once this duck's signature game has been won on the save. */
+export function hasClearedSignature(
+  characterId: string,
+  flags: Record<string, boolean> | null | undefined
+): boolean {
+  if (!flags) return false;
+  if (flags[signatureClearedFlag(characterId)]) return true;
+  const sig = signatureMinigameFor(characterId);
+  return Boolean(sig && flags[minigameClearedFlag(sig)]);
+}
+
 /** Pick signature until cleared on this save, then a random pool game. */
 export function resolvePlayableMinigame(
   characterId: string,
@@ -94,9 +105,15 @@ export function resolvePlayableMinigame(
   rng: () => number = Math.random
 ): PlayableMinigameId {
   const sig = signatureMinigameFor(characterId);
-  if (sig && !flags?.[signatureClearedFlag(characterId)]) return sig;
-  const i = Math.floor(rng() * RANDOM_MINIGAME_IDS.length);
-  return RANDOM_MINIGAME_IDS[i] ?? "rhythm_lanes";
+  if (sig && !hasClearedSignature(characterId, flags)) return sig;
+
+  // Prefer pool games not yet cleared so each ★ after the signature feels new.
+  const unplayed = RANDOM_MINIGAME_IDS.filter(
+    (id) => !flags?.[minigameClearedFlag(id)]
+  );
+  const pool = unplayed.length > 0 ? unplayed : RANDOM_MINIGAME_IDS;
+  const i = Math.floor(rng() * pool.length);
+  return pool[i] ?? "rhythm_lanes";
 }
 
 export function allMinigameRecords(): Minigame[] {
@@ -114,11 +131,11 @@ export function recordMinigameWinFlags(
   const next = { ...flags };
   next[minigameClearedFlag(input.playedMinigameId)] = true;
   const sig = signatureMinigameFor(input.characterId);
+  // Signature unlocks the random pool for later ★ launches with this duck.
   if (sig && input.playedMinigameId === sig) {
     next[signatureClearedFlag(input.characterId)] = true;
+    next[minigameClearedFlag(sig)] = true;
   }
-  // Keep legacy "any minigame cleared" checks working.
-  next[`minigame:${input.playedMinigameId}`] = true;
   next[MINIGAME_COOLDOWN_FLAG] = true;
   return next;
 }

@@ -4,7 +4,11 @@ import type {
   DialogueOption,
   FriendlinessTier,
 } from "@duck-dating/shared";
-import { START_NODE_ID, getFriendlinessLabel } from "@duck-dating/shared";
+import {
+  START_NODE_ID,
+  getFriendlinessLabel,
+  recordMinigameWinFlags,
+} from "@duck-dating/shared";
 import {
   fetchProgress,
   fetchStart,
@@ -29,6 +33,8 @@ interface GameState {
   phase: GamePhase;
   bundle: DialogueBundle | null;
   pendingOption: DialogueOption | null;
+  /** Mirrored save flags — used so post-signature randoms don't depend on a flaky progress refetch. */
+  flags: Record<string, boolean>;
   /** Minigame choices failed this visit — stay greyed until the node changes. */
   lockedMinigameOptionIds: string[];
   typedLength: number;
@@ -54,11 +60,20 @@ function phaseForBundle(bundle: DialogueBundle): GamePhase {
   return bundle.node.isEnding ? "ending" : "dialogue";
 }
 
+function mergeFlags(
+  current: Record<string, boolean>,
+  incoming?: Record<string, boolean> | null
+): Record<string, boolean> {
+  if (!incoming) return current;
+  return { ...current, ...incoming };
+}
+
 export const useGameStore = create<GameState>((set, get) => ({
   playerId: getOrCreatePlayerId(),
   phase: "title",
   bundle: null,
   pendingOption: null,
+  flags: {},
   lockedMinigameOptionIds: [],
   typedLength: 0,
   error: null,
@@ -80,7 +95,10 @@ export const useGameStore = create<GameState>((set, get) => ({
           (progress.flags?.hasSave === true ||
             progress.currentNodeId !== START_NODE_ID)
       );
-      set({ canContinue });
+      set({
+        canContinue,
+        flags: mergeFlags(get().flags, progress.flags),
+      });
     } catch {
       // 404 / no save for this device
       set({ canContinue: false });
@@ -97,10 +115,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       phase: "intro",
       bundle: null,
       pendingOption: null,
+      flags: {},
+      lockedMinigameOptionIds: [],
     });
     try {
       await resetProgress(get().playerId);
-      set({ titleBusy: false });
+      set({ titleBusy: false, flags: {} });
     } catch (e) {
       set({
         titleBusy: false,
@@ -127,13 +147,17 @@ export const useGameStore = create<GameState>((set, get) => ({
   load: async () => {
     set({ phase: "loading", error: null });
     try {
-      const bundle = await fetchStart(get().playerId);
+      const [bundle, progress] = await Promise.all([
+        fetchStart(get().playerId),
+        fetchProgress(get().playerId).catch(() => null),
+      ]);
       set({
         bundle,
         phase: phaseForBundle(bundle),
         typedLength: 0,
         pendingOption: null,
         lockedMinigameOptionIds: [],
+        flags: mergeFlags(get().flags, progress?.flags),
         canContinue: bundle.node.id !== START_NODE_ID || bundle.node.isEnding,
       });
     } catch (e) {
@@ -164,6 +188,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         typedLength: 0,
         pendingOption: null,
         lockedMinigameOptionIds: [],
+        flags: mergeFlags(get().flags, result.flags),
         error: null,
         canContinue: true,
       });
@@ -192,6 +217,15 @@ export const useGameStore = create<GameState>((set, get) => ({
       return;
     }
     try {
+      const characterId =
+        get().bundle?.node.characterId ?? get().bundle?.character.id ?? "breadluvr";
+      const played = playedMinigameId ?? option.minigameId ?? "bread_snake";
+      // Optimistically unlock the random pool even if the next progress GET is stale.
+      const optimistic = recordMinigameWinFlags(get().flags, {
+        playedMinigameId: played,
+        characterId,
+      });
+
       const result = await postChoice(
         option.id,
         true,
@@ -215,6 +249,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         typedLength: 0,
         pendingOption: null,
         lockedMinigameOptionIds: [],
+        flags: mergeFlags(optimistic, result.flags),
         error: null,
         canContinue: true,
       });
@@ -247,7 +282,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   saveAndQuitToTitle: async () => {
-    const { bundle, playerId } = get();
+    const { bundle, playerId, flags } = get();
     if (!bundle) {
       await get().prepareTitle();
       return;
@@ -257,7 +292,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         playerId,
         currentNodeId: bundle.node.id,
         characterId: bundle.character.id,
-        flags: { hasSave: true },
+        flags: { ...flags, hasSave: true },
       });
       set({
         phase: "title",
