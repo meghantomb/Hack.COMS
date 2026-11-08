@@ -22,19 +22,13 @@ export function IntroVideo({ onFinished }: { onFinished: () => void }) {
     if (!video) return;
 
     const tryPlay = async () => {
+      // Video is muted so intro BGM (Cyborg Ninja) can play cleanly.
+      video.muted = true;
       try {
-        video.muted = false;
         await video.play();
         setNeedsTap(false);
       } catch {
-        try {
-          // Browsers often allow muted autoplay when unmuted is blocked.
-          video.muted = true;
-          await video.play();
-          setNeedsTap(false);
-        } catch {
-          setNeedsTap(true);
-        }
+        setNeedsTap(true);
       }
     };
 
@@ -53,11 +47,14 @@ export function IntroVideo({ onFinished }: { onFinished: () => void }) {
 
   if (loadFailed) {
     return (
-      <div className="flex h-full min-h-[100dvh] items-center justify-center bg-pond-ink font-display text-pond-foam">
+      <div className="flex h-full min-h-[100dvh] items-center justify-center bg-ui-panel font-display text-ui-cream">
         Starting…
       </div>
     );
   }
+
+  const creamBtn =
+    "rounded-full border-none bg-ui-cream px-8 py-3 font-display text-lg text-ui-brown transition-[filter] duration-200 hover:brightness-110";
 
   return (
     <div className="relative flex h-full min-h-[100dvh] items-center justify-center bg-black">
@@ -66,6 +63,7 @@ export function IntroVideo({ onFinished }: { onFinished: () => void }) {
         className="max-h-full max-w-full"
         src={introVideoSrc()}
         playsInline
+        muted
         preload="auto"
         onEnded={finish}
         onError={() => setLoadFailed(true)}
@@ -77,22 +75,16 @@ export function IntroVideo({ onFinished }: { onFinished: () => void }) {
           onClick={() => {
             const video = videoRef.current;
             if (!video) return;
-            video.muted = false;
+            video.muted = true;
             void video.play().then(() => setNeedsTap(false)).catch(() => undefined);
           }}
           className="absolute inset-0 z-10 flex items-center justify-center bg-black/50"
         >
-          <span className="rounded-full bg-pond-sunset px-8 py-3 font-display text-lg text-pond-ink">
-            Play intro
-          </span>
+          <span className={creamBtn}>Play intro</span>
         </button>
       )}
 
-      <button
-        type="button"
-        onClick={finish}
-        className="absolute bottom-6 right-6 z-20 rounded-full border border-white/40 bg-black/50 px-5 py-2 font-display text-sm text-white backdrop-blur-sm hover:bg-black/70"
-      >
+      <button type="button" onClick={finish} className={`absolute bottom-6 right-6 z-20 ${creamBtn}`}>
         Skip
       </button>
     </div>

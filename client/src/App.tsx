@@ -5,10 +5,11 @@ import { CharacterStage } from "./components/CharacterStage";
 import { DialogueBox } from "./components/DialogueBox";
 import { ChoiceMenu } from "./components/ChoiceMenu";
 import { StageChrome } from "./components/LoveMeters";
-import { EndingScreen } from "./components/EndingScreen";
+import { EndingScreen, StatusScreen } from "./components/EndingScreen";
 import { MinigameOverlay } from "./minigames/MinigameOverlay";
 import { TitleScreen } from "./components/TitleScreen";
 import { IntroVideo } from "./components/IntroVideo";
+import { BackgroundMusic } from "./components/BackgroundMusic";
 import { ducksOnStage } from "./stage/ducksOnStage";
 import { layoutStage } from "./stage/layoutStage";
 
@@ -23,7 +24,6 @@ export default function App() {
   const continueGame = useGameStore((s) => s.continueGame);
   const finishIntro = useGameStore((s) => s.finishIntro);
   const load = useGameStore((s) => s.load);
-  const restart = useGameStore((s) => s.restart);
   const goToTitle = useGameStore((s) => s.goToTitle);
   const saveAndQuitToTitle = useGameStore((s) => s.saveAndQuitToTitle);
 
@@ -31,54 +31,67 @@ export default function App() {
     void prepareTitle();
   }, [prepareTitle]);
 
+  const music = <BackgroundMusic phase={phase} />;
+
   if (phase === "title") {
     return (
-      <TitleScreen
-        canContinue={canContinue}
-        busy={titleBusy}
-        onNewGame={() => void startNewGame()}
-        onContinue={() => void continueGame()}
-      />
+      <>
+        {music}
+        <TitleScreen
+          canContinue={canContinue}
+          busy={titleBusy}
+          onNewGame={() => void startNewGame()}
+          onContinue={() => void continueGame()}
+        />
+      </>
     );
   }
 
   if (phase === "intro") {
-    return <IntroVideo onFinished={() => void finishIntro()} />;
+    return (
+      <>
+        {music}
+        <IntroVideo onFinished={() => void finishIntro()} />
+      </>
+    );
   }
 
   if (phase === "loading") {
     return (
-      <div className="flex h-full items-center justify-center bg-pond-ink font-display text-pond-foam">
-        Loading pond…
-      </div>
+      <>
+        {music}
+        <StatusScreen title="Loading pond…" />
+      </>
     );
   }
 
   if (phase === "error" || !bundle) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 bg-pond-ink px-6 text-center">
-        <p className="font-display text-2xl text-pond-foam">Could not reach the pond</p>
-        <p className="max-w-md text-pond-light">{error ?? "Unknown error"}</p>
-        <p className="text-sm text-pond-foam/50">
-          Start the API with <code className="text-pond-sunset">npm run dev:server</code>
-        </p>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="rounded-full bg-pond-sunset px-6 py-2 font-display text-pond-ink"
-          >
-            Retry
-          </button>
-          <button
-            type="button"
-            onClick={() => void goToTitle()}
-            className="rounded-full border border-pond-light/40 px-6 py-2 font-display text-pond-foam"
-          >
-            Title
-          </button>
-        </div>
-      </div>
+      <>
+        {music}
+        <StatusScreen
+          title="Could not reach the pond"
+          body={error ?? "Unknown error"}
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => void load()}
+                className="rounded-full bg-ui-cream px-8 py-3 font-display text-lg text-ui-brown transition-[filter] duration-200 hover:brightness-110"
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                onClick={() => void goToTitle()}
+                className="rounded-full bg-ui-cream px-8 py-3 font-display text-lg text-ui-brown transition-[filter] duration-200 hover:brightness-110"
+              >
+                Title
+              </button>
+            </>
+          }
+        />
+      </>
     );
   }
 
@@ -86,37 +99,38 @@ export default function App() {
   const layout = layoutStage(ducksOnStage(bundle, showDucks));
 
   return (
-    <div className="relative flex h-full min-h-[100dvh] flex-col overflow-hidden">
-      <Background />
+    <>
+      {music}
+      <div className="relative h-full min-h-[100dvh] overflow-hidden">
+        <Background />
 
-      <StageChrome
-        layout={layout}
-        meters={bundle.loveMeters}
-        onRestart={() => void restart()}
-        onSaveAndQuit={() => void saveAndQuitToTitle()}
-      />
-
-      {(phase === "dialogue" || phase === "ending") && (
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        {/* Characters stay fixed behind UI; kept low in the frame. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 top-[24%] z-10 pb-[10rem] sm:top-[26%] sm:pb-48">
           <CharacterStage layout={layout} showDucks={showDucks} />
         </div>
-      )}
 
-      {phase === "dialogue" && (
-        <div className="relative z-20 mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 pb-4 sm:px-8 sm:pb-6">
-          <DialogueBox speaker={bundle.node.speaker} text={bundle.node.text} />
-          <ChoiceMenu options={bundle.options} />
-        </div>
-      )}
+        <StageChrome
+          layout={layout}
+          meters={bundle.loveMeters}
+          onSaveAndQuit={() => void saveAndQuitToTitle()}
+        />
 
-      {phase === "ending" && <EndingScreen />}
-      {phase === "minigame" && <MinigameOverlay />}
+        {phase === "dialogue" && (
+          <div className="absolute inset-x-0 bottom-0 z-20 mx-auto flex w-full max-w-4xl flex-col gap-3 px-4 pb-4 pr-20 sm:px-8 sm:pb-6 sm:pr-24">
+            <DialogueBox speaker={bundle.node.speaker} text={bundle.node.text} />
+            <ChoiceMenu options={bundle.options} />
+          </div>
+        )}
 
-      {error && phase === "dialogue" && (
-        <p className="absolute left-1/2 top-20 z-30 -translate-x-1/2 rounded bg-red-900/80 px-3 py-1 text-sm text-white">
-          {error}
-        </p>
-      )}
-    </div>
+        {phase === "ending" && <EndingScreen />}
+        {phase === "minigame" && <MinigameOverlay />}
+
+        {error && phase === "dialogue" && (
+          <p className="absolute left-1/2 top-20 z-30 -translate-x-1/2 rounded-xl bg-ui-brown/90 px-3 py-1 font-display text-sm text-ui-cream">
+            {error}
+          </p>
+        )}
+      </div>
+    </>
   );
 }

@@ -20,6 +20,10 @@
  *   assets/intro/title_background.png
  *   assets/intro/title.png  (logo layered on top)
  *
+ * Music:
+ *   assets/music/Kawai Kitsune.mp3  — title + gameplay
+ *   assets/music/Cyborg Ninja.mp3   — intro video
+ *
  * Staging: MC left / duck right — duck uses *_left, player faces toward the duck.
  */
 
@@ -64,3 +68,14 @@ export function duckSrc(spriteKey: string, facing: Facing): string {
 export function duckPortraitSrc(spriteKey: string): string {
   return duckSrc(spriteKey, "right");
 }
+
+/** Title screen + main gameplay loop. */
+export function gameplayMusicSrc(): string {
+  return asset(`music/${encodeURIComponent("Kawai Kitsune.mp3")}`);
+}
+
+/** Intro cutscene loop. */
+export function introMusicSrc(): string {
+  return asset(`music/${encodeURIComponent("Cyborg Ninja.mp3")}`);
+}
+

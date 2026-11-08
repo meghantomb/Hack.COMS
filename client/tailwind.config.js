@@ -13,6 +13,20 @@ export default {
           sunset: "#e8a87c",
           ink: "#14232b",
         },
+        ui: {
+          /** Borders, button text, accents */
+          brown: "#87641D",
+          /** Cream — bars empty, buttons, labels */
+          cream: "#F2DFB3",
+          pale: "#F2DFB3",
+          /** Dialogue / choice panels at 70% opacity */
+          panel: "#715315",
+          /** Friendship fill */
+          pink: "#FFBCBC",
+          /** Heart */
+          heart: "#FF7171",
+          white: "#ffffff",
+        },
       },
       fontFamily: {
         display: ['"Fredoka"', "system-ui", "sans-serif"],

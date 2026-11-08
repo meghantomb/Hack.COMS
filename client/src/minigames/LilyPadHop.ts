@@ -39,7 +39,7 @@ export class LilyPadHopScene extends Phaser.Scene {
       .text(width / 2, 28, "Lily Pad Hop", {
         fontFamily: "Fredoka, sans-serif",
         fontSize: "28px",
-        color: "#d4f1f1",
+        color: "#F2DFB3",
       })
       .setOrigin(0.5);
 
@@ -47,7 +47,7 @@ export class LilyPadHopScene extends Phaser.Scene {
       .text(width / 2, 58, "Click the next pad in order — miss and you splash!", {
         fontFamily: "Nunito, sans-serif",
         fontSize: "14px",
-        color: "#7ec8c8",
+        color: "#F2DFB3",
       })
       .setOrigin(0.5);
 
@@ -76,7 +76,7 @@ export class LilyPadHopScene extends Phaser.Scene {
         .text(x, y, `${i + 1}`, {
           fontFamily: "Fredoka, sans-serif",
           fontSize: "16px",
-          color: "#d4f1f1",
+          color: "#F2DFB3",
         })
         .setOrigin(0.5);
     }
@@ -89,7 +89,7 @@ export class LilyPadHopScene extends Phaser.Scene {
       .text(width / 2, height - 36, "Start on pad 1 — hop to pad 5", {
         fontFamily: "Nunito, sans-serif",
         fontSize: "13px",
-        color: "#d4f1f180",
+        color: "#F2DFB3",
       })
       .setOrigin(0.5);
   }
@@ -123,14 +123,14 @@ export class LilyPadHopScene extends Phaser.Scene {
   private win() {
     this.finished = true;
     this.statusText.setText("You made it across!");
-    this.statusText.setColor("#e8a87c");
+    this.statusText.setColor("#F2DFB3");
     this.time.delayedCall(700, () => this.onComplete("win"));
   }
 
   private lose() {
     this.finished = true;
     this.statusText.setText("Splash! Back to choices…");
-    this.statusText.setColor("#ff8a8a");
+    this.statusText.setColor("#F2DFB3");
     this.tweens.add({
       targets: this.duck,
       y: this.duck.y + 80,
