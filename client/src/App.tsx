@@ -7,6 +7,8 @@ import { ChoiceMenu } from "./components/ChoiceMenu";
 import { StageChrome } from "./components/LoveMeters";
 import { EndingScreen } from "./components/EndingScreen";
 import { MinigameOverlay } from "./minigames/MinigameOverlay";
+import { TitleScreen } from "./components/TitleScreen";
+import { IntroVideo } from "./components/IntroVideo";
 import { ducksOnStage } from "./stage/ducksOnStage";
 import { layoutStage } from "./stage/layoutStage";
 
@@ -14,12 +16,34 @@ export default function App() {
   const phase = useGameStore((s) => s.phase);
   const bundle = useGameStore((s) => s.bundle);
   const error = useGameStore((s) => s.error);
+  const canContinue = useGameStore((s) => s.canContinue);
+  const titleBusy = useGameStore((s) => s.titleBusy);
+  const prepareTitle = useGameStore((s) => s.prepareTitle);
+  const startNewGame = useGameStore((s) => s.startNewGame);
+  const continueGame = useGameStore((s) => s.continueGame);
+  const finishIntro = useGameStore((s) => s.finishIntro);
   const load = useGameStore((s) => s.load);
   const restart = useGameStore((s) => s.restart);
+  const goToTitle = useGameStore((s) => s.goToTitle);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void prepareTitle();
+  }, [prepareTitle]);
+
+  if (phase === "title") {
+    return (
+      <TitleScreen
+        canContinue={canContinue}
+        busy={titleBusy}
+        onNewGame={() => void startNewGame()}
+        onContinue={() => void continueGame()}
+      />
+    );
+  }
+
+  if (phase === "intro") {
+    return <IntroVideo onFinished={() => void finishIntro()} />;
+  }
 
   if (phase === "loading") {
     return (
@@ -37,13 +61,22 @@ export default function App() {
         <p className="text-sm text-pond-foam/50">
           Start the API with <code className="text-pond-sunset">npm run dev:server</code>
         </p>
-        <button
-          type="button"
-          onClick={() => void load()}
-          className="rounded-full bg-pond-sunset px-6 py-2 font-display text-pond-ink"
-        >
-          Retry
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="rounded-full bg-pond-sunset px-6 py-2 font-display text-pond-ink"
+          >
+            Retry
+          </button>
+          <button
+            type="button"
+            onClick={() => void goToTitle()}
+            className="rounded-full border border-pond-light/40 px-6 py-2 font-display text-pond-foam"
+          >
+            Title
+          </button>
+        </div>
       </div>
     );
   }
@@ -53,7 +86,7 @@ export default function App() {
 
   return (
     <div className="relative flex h-full min-h-[100dvh] flex-col overflow-hidden">
-      <Background backgroundKey={bundle.node.backgroundKey} />
+      <Background />
 
       <StageChrome
         layout={layout}

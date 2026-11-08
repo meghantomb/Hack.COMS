@@ -5,12 +5,11 @@ import cors from "cors";
 import { dialogueRouter } from "./routes/dialogue";
 import { progressRouter } from "./routes/progress";
 import { generateRouter } from "./routes/generate";
-import { isUsingDatabase } from "./db";
+import { initDb, isUsingDatabase } from "./db";
 import { ensurePlayer } from "./services/gameService";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 dotenv.config();
-
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
@@ -31,9 +30,10 @@ app.use("/api/progress", progressRouter);
 app.use("/api/generate", generateRouter);
 
 async function main() {
+  const mode = await initDb();
   await ensurePlayer();
   app.listen(PORT, () => {
-    console.log(`Duck Dating API on http://localhost:${PORT} (${isUsingDatabase() ? "postgres" : "memory"})`);
+    console.log(`Duck Dating API on http://localhost:${PORT} (${mode})`);
   });
 }
 

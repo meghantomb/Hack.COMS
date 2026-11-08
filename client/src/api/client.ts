@@ -56,3 +56,9 @@ export function resetProgress(playerId = DEFAULT_PLAYER_ID) {
     body: JSON.stringify({ playerId }),
   });
 }
+
+export function fetchProgress(playerId = DEFAULT_PLAYER_ID) {
+  return request<PlayerProgress>(
+    `/api/progress/${encodeURIComponent(playerId)}`
+  );
+}

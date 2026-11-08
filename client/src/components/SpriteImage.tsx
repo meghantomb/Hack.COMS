@@ -41,6 +41,13 @@ export function SpriteImage({
       alt={alt}
       className={className}
       draggable={false}
+      decoding="async"
+      style={{
+        // Avoid CSS filters/shadows — they fringe transparent PNG edges.
+        filter: "none",
+        WebkitFilter: "none",
+        background: "transparent",
+      }}
       onError={() => setFailed(true)}
     />
   );

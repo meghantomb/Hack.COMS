@@ -10,11 +10,13 @@
  * Player (MC):
  *   player/player_left.png   player/player_right.png
  *
- * Backgrounds:
- *   backgrounds/pond.png | island.png | pond_sunset.png
+ * Background:
+ *   backgrounds/pond.png
  *
- * Staging: one duck keeps the bread on the opposite side. Several ducks put the bread
- * in the center; a duck on the left uses *_right, a duck on the right uses *_left.
+ * Intro (new game only):
+ *   public/intro/bread_intro_video.mp4  →  /intro/bread_intro_video.mp4
+ *
+ * Staging: MC left / duck right — duck uses *_left, player faces toward the duck.
  */
 
 export const DUCK_IDS = ["jock", "breadluvr", "badboy", "artist"] as const;
@@ -22,12 +24,16 @@ export type DuckId = (typeof DUCK_IDS)[number];
 
 export type Facing = "left" | "right";
 
-export const BACKGROUND_KEYS = ["pond", "island", "pond_sunset"] as const;
-
 const asset = (path: string) => `/assets/${path}`;
 
-export function backgroundSrc(key: string): string {
-  return asset(`backgrounds/${key}.png`);
+/** Single background slot. */
+export function backgroundSrc(): string {
+  return asset("backgrounds/pond.png");
+}
+
+/** New-game intro cutscene (lives in public/intro/, not public/assets/). */
+export function introVideoSrc(): string {
+  return "/intro/bread_intro_video.mp4";
 }
 
 /** Player on the left side of the screen → usually `right` (faces the duck). */
