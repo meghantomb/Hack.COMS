@@ -239,7 +239,7 @@ export const ryanNodes: DialogueNode[] = [
     id: "ryan_train_invite",
     characterId: "jock",
     speaker: "Ryan",
-    text: "One more push. Training pace — which still means I want to win. But if you stay close, I'll try to remember this isn't a performance. Ready?"
+    text: "One more push. Training pace — which still means I want to win. But if you stay close, I'll try to remember this isn't a performance. Ready?",
     backgroundKey: "pond",
     spriteExpression: "hopeful",
     isEnding: false,
