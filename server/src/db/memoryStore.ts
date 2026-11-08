@@ -229,14 +229,15 @@ export class MemoryStore {
     const maxExchanges =
       (node.conversationId && this.conversations.get(node.conversationId)?.maxExchanges) || 20;
 
+    const finishingMinigame = Boolean(option.minigameId && minigameWon === true);
     const available = optionIsAvailable({
       minFriendliness: option.minFriendliness,
       requiredTier: option.requiredTier,
       continuesConversation: option.continuesConversation,
       requiresMinigameWin: option.requiresMinigameWin,
       minigameCleared: hasClearedMinigame(progress.flags),
-      minigameCooldown: hasMinigameCooldown(progress.flags),
-      hasMinigameOffer: Boolean(option.minigameId),
+      minigameCooldown: finishingMinigame ? false : hasMinigameCooldown(progress.flags),
+      hasMinigameOffer: finishingMinigame ? false : Boolean(option.minigameId),
       nextMinFriendliness: nextNode.minFriendliness,
       friendliness,
       tier,

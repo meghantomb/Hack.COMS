@@ -174,7 +174,6 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   completeMinigame: async (won, playedMinigameId) => {
     const option = get().pendingOption;
-    const fromNodeId = get().bundle?.node.id;
     if (!option) {
       set({ phase: "dialogue" });
       return;
@@ -209,11 +208,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         });
         return;
       }
-      // Never re-show the line that launched the minigame after a win.
-      if (result.bundle.node.id === fromNodeId || result.bundle.node.id === option.nodeId) {
-        await get().load();
-        return;
-      }
+      // Always advance to the post-choice line — never remount the launcher.
       set({
         bundle: result.bundle,
         phase: phaseForBundle(result.bundle),

@@ -149,7 +149,7 @@ export const ryanNodes: DialogueNode[] = [
     id: "ryan_invite_race",
     characterId: "jock",
     speaker: "Ryan",
-    text: "Once around the reeds. No splash-outs, no mercy, lots of cheering — I'll cheer for you even while I'm winning. If you beat me... huh. That would be new. You in?",
+    text: "Stick with me through this stretch — no quitting early, no going easy. If you can keep up with me... huh. That would be new. You in?",
     backgroundKey: "pond",
     spriteExpression: "hopeful",
     isEnding: false,
@@ -239,7 +239,7 @@ export const ryanNodes: DialogueNode[] = [
     id: "ryan_train_invite",
     characterId: "jock",
     speaker: "Ryan",
-    text: "One more lap around the reeds. Training pace. Which still means I want to win. But if you stay close, I'll try to remember this isn't a performance. Ready?",
+    text: "One more push. Training pace — which still means I want to win. But if you stay close, I'll try to remember this isn't a performance. Ready?"
     backgroundKey: "pond",
     spriteExpression: "hopeful",
     isEnding: false,
@@ -510,9 +510,9 @@ const ryanOptionsBase: DialogueOption[] = [
   reply({
     id: "ryan_opt_race_yes",
     nodeId: "ryan_invite_race",
-    text: "I'll take the challenge. Don't go easy.",
+    text: "I'm in. Don't go easy on me.",
     nextNodeId: "ryan_after_win",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "slide_puzzle",
     sortOrder: 0,
   }),
@@ -662,9 +662,9 @@ const ryanOptionsBase: DialogueOption[] = [
   reply({
     id: "ryan_opt_train_race_yes",
     nodeId: "ryan_train_invite",
-    text: "Let's play something. Stay where I can see you.",
+    text: "One more lap. I'll stay right with you.",
     nextNodeId: "ryan_train_win",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "slide_puzzle",
     sortOrder: 0,
   }),
@@ -926,9 +926,9 @@ const ryanOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Jock Slide. Later ids stay slide_puzzle; the client picks the random pool after that win. */
-/** One optional offer per visit (authored first-meet race already launches a game). */
+/** Quiet high-boost launchers — one optional beat per later visit. */
 export const ryanOptions: DialogueOption[] = attachMinigameChoices(ryanOptionsBase, "slide_puzzle", [
-  { nodeId: "ryan_train_hello", id: "opt_mg_ryan_train_hello", text: "I'll play, if you will." },
-  { nodeId: "ryan_crowd_arrive", id: "opt_mg_ryan_crowd", text: "I'll take you on." },
-  { nodeId: "ryan_final_hello", id: "opt_mg_ryan_final", text: "I'll take the challenge." },
+  "ryan_train_hello",
+  "ryan_crowd_arrive",
+  "ryan_final_hello",
 ]);

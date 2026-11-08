@@ -597,9 +597,9 @@ const xanderOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_x_hop_yes",
     nodeId: "xander_invite",
-    text: "I'll take you on. Don't disappear on me.",
+    text: "Lead the way. Don't disappear on me.",
     nextNodeId: "xander_after_hop",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "bullet_hell",
     sortOrder: 0,
   }),
@@ -934,9 +934,9 @@ const xanderOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_x3_hop",
     nodeId: "xander3_invite",
-    text: "Let's play something. Lose the audience with me.",
+    text: "Then let's lose them. Quiet stretch.",
     nextNodeId: "xander3_after_hop",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "bullet_hell",
     sortOrder: 0,
   }),
@@ -1073,14 +1073,9 @@ const xanderOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Badboy Barrage. Later ids stay bullet_hell; the client picks the random pool after that win. */
-/** One optional offer per visit. */
+/** Quiet high-boost launchers — one optional beat per visit. */
 export const xanderOptions: DialogueOption[] = attachMinigameChoices(
   xanderOptionsBase,
   "bullet_hell",
-  [
-    { nodeId: "xander_deep_end_meet", id: "opt_mg_x_meet", text: "I'll dodge. Keep your eyes on me." },
-    { nodeId: "xander2_hello", id: "opt_mg_x2_hello", text: "I'll take you on." },
-    { nodeId: "xander3_hello", id: "opt_mg_x3_hello", text: "I'll take the challenge." },
-    { nodeId: "xander4_edge", id: "opt_mg_x4_edge", text: "Make it a game. I'm in." },
-  ]
+  ["xander_deep_end_meet", "xander2_hello", "xander3_hello", "xander4_edge"]
 );

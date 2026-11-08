@@ -1,55 +1,43 @@
-import type { DialogueOption, FriendlinessTier } from "@duck-dating/shared";
-
-export interface MinigameChoice {
-  nodeId: string;
-  id: string;
-  text: string;
-}
+import type { DialogueOption } from "@duck-dating/shared";
 
 /**
- * Add exactly one launching reply on nodes that do not already have one.
- * The reply continues to the same line as an existing reply, so a win is not a dead end.
- * An ungated reply is preferred. If every reply is gated, the new one keeps that gate
- * so a minigame cannot skip a closeness check.
+ * Mark one existing reply on each listed node as a silent minigame launcher.
+ * Keeps the original wording — only bumps friendship and attaches minigameId —
+ * so the choice reads like the rest of the scene, just worth more.
  */
 export function attachMinigameChoices(
   options: DialogueOption[],
   minigameId: string,
-  additions: MinigameChoice[]
+  nodeIds: string[],
+  boostTo = 18
 ): DialogueOption[] {
-  const extra: DialogueOption[] = [];
-  for (const add of additions) {
-    const onNode = options.filter((option) => option.nodeId === add.nodeId);
-    if (onNode.length === 0) {
-      throw new Error(`No replies on ${add.nodeId}`);
-    }
+  const targets = new Set(nodeIds);
+  const pickIds = new Set<string>();
+
+  for (const nodeId of targets) {
+    const onNode = options.filter((option) => option.nodeId === nodeId);
     if (onNode.some((option) => option.minigameId)) continue;
-    const open = onNode.find(
+
+    const candidates = onNode.filter(
       (option) =>
         !option.requiresMinigameWin &&
-        !option.requiredTier &&
+        !option.continuesConversation &&
         option.minFriendliness === 0 &&
-        !option.continuesConversation
+        !option.requiredTier
     );
-    const anchor =
-      open ??
-      onNode.find((option) => !option.requiresMinigameWin && !option.continuesConversation);
-    if (!anchor) {
-      throw new Error(`No reply to continue from ${add.nodeId}`);
-    }
-    extra.push({
-      id: add.id,
-      nodeId: add.nodeId,
-      text: add.text,
-      nextNodeId: anchor.nextNodeId,
-      friendlinessDelta: open ? 12 : anchor.friendlinessDelta,
-      requiredTier: (open ? null : anchor.requiredTier) as FriendlinessTier | null,
-      minFriendliness: open ? 0 : anchor.minFriendliness,
-      minigameId,
-      requiresMinigameWin: false,
-      continuesConversation: false,
-      sortOrder: Math.max(...onNode.map((option) => option.sortOrder)) + 1,
-    });
+    const pool = candidates.length > 0 ? candidates : onNode.filter((o) => !o.requiresMinigameWin);
+    if (pool.length === 0) continue;
+
+    const best = [...pool].sort((a, b) => b.friendlinessDelta - a.friendlinessDelta)[0]!;
+    pickIds.add(best.id);
   }
-  return [...options, ...extra];
+
+  return options.map((option) => {
+    if (!pickIds.has(option.id)) return option;
+    return {
+      ...option,
+      minigameId,
+      friendlinessDelta: Math.max(option.friendlinessDelta, boostTo),
+    };
+  });
 }

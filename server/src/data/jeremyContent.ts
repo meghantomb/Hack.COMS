@@ -592,9 +592,9 @@ const jeremyOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_jeremy_sit",
     nodeId: "jeremy_invite_draw",
-    text: "I'll play, if you will. Take the time you need.",
+    text: "I'll sit. Take the time you need.",
     nextNodeId: "jeremy_after_draw",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "pixel_paint",
     sortOrder: 0,
   }),
@@ -795,9 +795,9 @@ const jeremyOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_jeremy2_sit",
     nodeId: "jeremy2_invite",
-    text: "How about a game? I'm in.",
+    text: "I'll sit again. Try the color.",
     nextNodeId: "jeremy2_after_draw",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "pixel_paint",
     sortOrder: 0,
   }),
@@ -1020,9 +1020,9 @@ const jeremyOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_jeremy3_sit",
     nodeId: "jeremy3_invite",
-    text: "I'll take the challenge.",
+    text: "Just as I am. I'm here.",
     nextNodeId: "jeremy3_after_draw",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "pixel_paint",
     sortOrder: 0,
   }),
@@ -1262,10 +1262,10 @@ const jeremyOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Pond Pixel. Later ids stay pixel_paint; the client picks the random pool after that win. */
-/** One optional offer per visit. */
+/** Quiet high-boost launchers — one optional beat per visit. */
 export const jeremyOptions: DialogueOption[] = attachMinigameChoices(jeremyOptionsBase, "pixel_paint", [
-  { nodeId: "jeremy_pond_meet", id: "opt_mg_jeremy_meet", text: "I'll try the painting. Show me the squares." },
-  { nodeId: "jeremy2_hello", id: "opt_mg_jeremy2_hello", text: "Make it a game. I'm in." },
-  { nodeId: "jeremy3_caught", id: "opt_mg_jeremy3_caught", text: "Let's play something." },
-  { nodeId: "jeremy4_ask", id: "opt_mg_jeremy4_ask", text: "I'll play, if you will." },
+  "jeremy_pond_meet",
+  "jeremy2_hello",
+  "jeremy3_caught",
+  "jeremy4_ask",
 ]);

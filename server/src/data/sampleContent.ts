@@ -792,9 +792,9 @@ const samOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_hop_yes",
     nodeId: "invite_hop",
-    text: "Let's play something. Stay where I can see you.",
+    text: "Okay. Just us for a minute — lead the way.",
     nextNodeId: "after_hop_win",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "bread_snake",
     sortOrder: 0,
   }),
@@ -809,9 +809,9 @@ const samOptionsBase: DialogueOption[] = [
   reply({
     id: "opt_hop_yes_close",
     nodeId: "invite_hop_close",
-    text: "I'll take the challenge. Stay close.",
+    text: "I'll come with you. Stay close.",
     nextNodeId: "after_hop_win",
-    friendlinessDelta: 16,
+    friendlinessDelta: 18,
     minigameId: "bread_snake",
     sortOrder: 0,
   }),
@@ -1322,9 +1322,9 @@ const samOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Bread Snake. Later ids stay bread_snake; the client picks the random pool after that win. */
-/** At most one optional minigame offer per later visit (first meeting already has invite_hop). */
+/** Quiet high-boost launchers — one optional beat per later visit. */
 export const samOptions: DialogueOption[] = attachMinigameChoices(samOptionsBase, "bread_snake", [
-  { nodeId: "c2_hello", id: "opt_mg_c2_hello", text: "Make it a game. I'm in." },
-  { nodeId: "c3_arrive", id: "opt_mg_c3_arrive", text: "Let's play something." },
-  { nodeId: "c4_hello", id: "opt_mg_c4_hello", text: "I'll take you on." },
+  "c2_hello",
+  "c3_arrive",
+  "c4_hello",
 ]);

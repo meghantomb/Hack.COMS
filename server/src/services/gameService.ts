@@ -446,14 +446,18 @@ export async function applyChoice(
         .limit(1)
     : [];
 
+  // Finishing a minigame you already started must not be blocked by cooldown.
+  const finishingMinigame = Boolean(option.minigameId && minigameWon === true);
   const available = optionIsAvailable({
     minFriendliness: option.minFriendliness ?? 0,
     requiredTier: (option.requiredTier as FriendlinessTier | null) ?? null,
     continuesConversation: option.continuesConversation ?? false,
     requiresMinigameWin: option.requiresMinigameWin ?? false,
     minigameCleared: hasClearedMinigame(progressRow?.flags as Record<string, boolean> | null),
-    minigameCooldown: hasMinigameCooldown(progressRow?.flags as Record<string, boolean> | null),
-    hasMinigameOffer: Boolean(option.minigameId),
+    minigameCooldown: finishingMinigame
+      ? false
+      : hasMinigameCooldown(progressRow?.flags as Record<string, boolean> | null),
+    hasMinigameOffer: finishingMinigame ? false : Boolean(option.minigameId),
     nextMinFriendliness: nextNode.minFriendliness,
     friendliness,
     tier,
