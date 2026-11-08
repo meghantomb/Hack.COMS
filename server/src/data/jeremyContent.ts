@@ -1262,19 +1262,10 @@ const jeremyOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Pond Pixel. Later ids stay pixel_paint; the client picks the random pool after that win. */
+/** One optional offer per visit. */
 export const jeremyOptions: DialogueOption[] = attachMinigameChoices(jeremyOptionsBase, "pixel_paint", [
   { nodeId: "jeremy_pond_meet", id: "opt_mg_jeremy_meet", text: "I'll try the painting. Show me the squares." },
-  { nodeId: "jeremy_almost_said", id: "opt_mg_jeremy_almost", text: "Let's play something." },
-  { nodeId: "jeremy_after_draw", id: "opt_mg_jeremy_after", text: "I'll take the challenge." },
-  { nodeId: "jeremy_xander_visits", id: "opt_mg_jeremy_xander", text: "How about a game?" },
-  { nodeId: "jeremy_muse", id: "opt_mg_jeremy_muse", text: "I'll play, if you will." },
   { nodeId: "jeremy2_hello", id: "opt_mg_jeremy2_hello", text: "Make it a game. I'm in." },
-  { nodeId: "jeremy2_after_draw", id: "opt_mg_jeremy2_after", text: "I'll take you on." },
-  { nodeId: "jeremy2_days", id: "opt_mg_jeremy2_days", text: "A game, then. I'm ready." },
-  { nodeId: "jeremy2_after_guest", id: "opt_mg_jeremy2_guest", text: "Let's make a game of it." },
   { nodeId: "jeremy3_caught", id: "opt_mg_jeremy3_caught", text: "Let's play something." },
-  { nodeId: "jeremy3_after_decline", id: "opt_mg_jeremy3_decline", text: "I'll take the challenge." },
-  { nodeId: "jeremy3_after_guest", id: "opt_mg_jeremy3_guest", text: "How about a game?" },
   { nodeId: "jeremy4_ask", id: "opt_mg_jeremy4_ask", text: "I'll play, if you will." },
-  { nodeId: "jeremy4_days", id: "opt_mg_jeremy4_days", text: "Make it a game. I'm in." },
 ]);

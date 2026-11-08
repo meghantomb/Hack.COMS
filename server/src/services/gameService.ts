@@ -11,7 +11,9 @@ import {
   applyChoiceProgress,
   bookmarkGraph,
   getFriendlinessTier,
+  clearMinigameCooldown,
   hasClearedMinigame,
+  hasMinigameCooldown,
   minigameFlag,
   recordMinigameWinFlags,
   optionIsAvailable,
@@ -320,6 +322,8 @@ export async function getDialogueBundle(
         continuesConversation: o.continuesConversation ?? false,
         requiresMinigameWin: o.requiresMinigameWin ?? false,
         minigameCleared: hasClearedMinigame(progressRow?.flags as Record<string, boolean> | null),
+        minigameCooldown: hasMinigameCooldown(progressRow?.flags as Record<string, boolean> | null),
+        hasMinigameOffer: Boolean(o.minigameId),
         nextMinFriendliness: next?.minFriendliness ?? 0,
         friendliness,
         tier,
@@ -448,6 +452,8 @@ export async function applyChoice(
     continuesConversation: option.continuesConversation ?? false,
     requiresMinigameWin: option.requiresMinigameWin ?? false,
     minigameCleared: hasClearedMinigame(progressRow?.flags as Record<string, boolean> | null),
+    minigameCooldown: hasMinigameCooldown(progressRow?.flags as Record<string, boolean> | null),
+    hasMinigameOffer: Boolean(option.minigameId),
     nextMinFriendliness: nextNode.minFriendliness,
     friendliness,
     tier,
@@ -521,14 +527,22 @@ export async function applyChoice(
       });
   }
 
-  let flags = { ...((progressRow?.flags as Record<string, boolean> | null) ?? {}) };
+  let flags: Record<string, boolean> = {
+    ...((progressRow?.flags as Record<string, boolean> | null) ?? {}),
+    hasSave: true,
+  };
   if (option.minigameId && minigameWon) {
     const played = playedMinigameId ?? option.minigameId;
-    flags = recordMinigameWinFlags(flags, {
-      playedMinigameId: played,
-      characterId: node.characterId,
-    });
-    flags[minigameFlag(option.minigameId)] = true;
+    flags = {
+      ...recordMinigameWinFlags(flags, {
+        playedMinigameId: played,
+        characterId: node.characterId,
+      }),
+      [minigameFlag(option.minigameId)]: true,
+      hasSave: true,
+    };
+  } else if (!option.minigameId) {
+    flags = { ...clearMinigameCooldown(flags), hasSave: true };
   }
 
   await db
@@ -576,6 +590,7 @@ export async function saveProgress(
   characterId: string,
   flags: Record<string, boolean> = {}
 ): Promise<PlayerProgress> {
+  await ensurePlayer(playerId);
   if (!isUsingDatabase()) {
     return memoryStore.saveProgress(playerId, currentNodeId, characterId, flags);
   }
@@ -593,6 +608,11 @@ export async function saveProgress(
   const node = nodeRow ? toNode(nodeRow) : null;
   const endingType = node?.isEnding ? node.endingType : asEnding(existing?.endingType);
   const conversationId = node?.conversationId ?? existing?.conversationId ?? null;
+  const mergedFlags = {
+    ...((existing?.flags as Record<string, boolean> | null) ?? {}),
+    ...flags,
+    hasSave: true,
+  };
   let bookmarks = readBookmarks(existing?.bookmarks);
   if (node && node.id !== START_NODE_ID) {
     bookmarks = rememberDuckPlace(
@@ -618,7 +638,7 @@ export async function saveProgress(
       exchangeCount: existing?.exchangeCount ?? 0,
       consecutiveConversations: existing?.consecutiveConversations ?? 0,
       endingType,
-      flags,
+      flags: mergedFlags,
       bookmarks,
       updatedAt: new Date(),
     })
@@ -629,7 +649,7 @@ export async function saveProgress(
         characterId,
         conversationId,
         endingType,
-        flags,
+        flags: mergedFlags,
         bookmarks,
         updatedAt: new Date(),
       },
@@ -643,16 +663,16 @@ export async function saveProgress(
     exchangeCount: existing?.exchangeCount ?? 0,
     consecutiveConversations: existing?.consecutiveConversations ?? 0,
     endingType,
-    flags,
+    flags: mergedFlags,
     bookmarks,
     updatedAt: new Date().toISOString(),
   };
 }
 
+/** Read-only: never creates a save row (so Continue stays hidden for new devices). */
 export async function getProgress(
   playerId: string
 ): Promise<PlayerProgress | null> {
-  await ensurePlayer(playerId);
   if (!isUsingDatabase()) {
     return memoryStore.getProgress(playerId);
   }

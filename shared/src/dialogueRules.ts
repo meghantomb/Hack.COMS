@@ -38,6 +38,9 @@ export function optionIsAvailable(input: {
   continuesConversation: boolean;
   requiresMinigameWin: boolean;
   minigameCleared: boolean;
+  /** When true, hide launching replies so wins aren't back-to-back. */
+  minigameCooldown?: boolean;
+  hasMinigameOffer?: boolean;
   nextMinFriendliness: number;
   friendliness: number;
   tier: FriendlinessTier;
@@ -50,6 +53,7 @@ export function optionIsAvailable(input: {
   if (input.friendliness < input.nextMinFriendliness) return false;
   if (!meetsTier(input.tier, input.requiredTier)) return false;
   if (input.requiresMinigameWin && !input.minigameCleared) return false;
+  if (input.minigameCooldown && input.hasMinigameOffer) return false;
   if (
     input.continuesConversation &&
     input.consecutiveConversations >= MAX_CONSECUTIVE_CONVERSATIONS

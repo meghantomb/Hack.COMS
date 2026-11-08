@@ -75,11 +75,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ phase: "title", error: null, bundle: null, pendingOption: null });
     try {
       const progress = await fetchProgress(get().playerId);
-      const canContinue =
-        progress.currentNodeId !== START_NODE_ID ||
-        progress.flags?.hasSave === true;
+      const canContinue = Boolean(
+        progress &&
+          (progress.flags?.hasSave === true ||
+            progress.currentNodeId !== START_NODE_ID)
+      );
       set({ canContinue });
     } catch {
+      // 404 / no save for this device
       set({ canContinue: false });
     }
   },
@@ -171,15 +174,18 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   completeMinigame: async (won, playedMinigameId) => {
     const option = get().pendingOption;
+    const fromNodeId = get().bundle?.node.id;
     if (!option) {
       set({ phase: "dialogue" });
       return;
     }
     if (!won) {
       const locked = get().lockedMinigameOptionIds;
+      const textLen = get().bundle?.node.text.length ?? 0;
       set({
         pendingOption: null,
         phase: "dialogue",
+        typedLength: textLen,
         lockedMinigameOptionIds: locked.includes(option.id)
           ? locked
           : [...locked, option.id],
@@ -194,11 +200,18 @@ export const useGameStore = create<GameState>((set, get) => ({
         playedMinigameId
       );
       if (!result.success || !result.bundle) {
+        const textLen = get().bundle?.node.text.length ?? 0;
         set({
           pendingOption: null,
           phase: "dialogue",
+          typedLength: textLen,
           error: result.reason ?? "Could not unlock response",
         });
+        return;
+      }
+      // Never re-show the line that launched the minigame after a win.
+      if (result.bundle.node.id === fromNodeId || result.bundle.node.id === option.nodeId) {
+        await get().load();
         return;
       }
       set({
@@ -211,9 +224,11 @@ export const useGameStore = create<GameState>((set, get) => ({
         canContinue: true,
       });
     } catch (e) {
+      const textLen = get().bundle?.node.text.length ?? 0;
       set({
         pendingOption: null,
         phase: "dialogue",
+        typedLength: textLen,
         error: e instanceof Error ? e.message : "Minigame unlock failed",
       });
     }

@@ -11,8 +11,11 @@ export const dialogueRouter = Router();
 
 dialogueRouter.get("/start", async (req, res) => {
   const playerId =
-    typeof req.query.playerId === "string" ? req.query.playerId : DEFAULT_PLAYER_ID;
+    typeof req.query.playerId === "string" && req.query.playerId.length > 0
+      ? req.query.playerId
+      : DEFAULT_PLAYER_ID;
   try {
+    // Create this device's save only when they actually start/continue — not on title poll.
     const progress = await getProgress(playerId);
     const nodeId = progress?.currentNodeId ?? START_NODE_ID;
     const bundle = await getDialogueBundle(nodeId, playerId);

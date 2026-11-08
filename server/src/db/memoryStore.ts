@@ -10,7 +10,9 @@ import {
   rememberDuckPlace,
   minigameFlag,
   recordMinigameWinFlags,
+  clearMinigameCooldown,
   hasClearedMinigame,
+  hasMinigameCooldown,
   optionIsAvailable,
   type Character,
   type ChoiceResult,
@@ -152,6 +154,8 @@ export class MemoryStore {
           continuesConversation: o.continuesConversation,
           requiresMinigameWin: o.requiresMinigameWin,
           minigameCleared: hasClearedMinigame(progress.flags),
+          minigameCooldown: hasMinigameCooldown(progress.flags),
+          hasMinigameOffer: Boolean(o.minigameId),
           nextMinFriendliness: next?.minFriendliness ?? 0,
           friendliness,
           tier,
@@ -231,6 +235,8 @@ export class MemoryStore {
       continuesConversation: option.continuesConversation,
       requiresMinigameWin: option.requiresMinigameWin,
       minigameCleared: hasClearedMinigame(progress.flags),
+      minigameCooldown: hasMinigameCooldown(progress.flags),
+      hasMinigameOffer: Boolean(option.minigameId),
       nextMinFriendliness: nextNode.minFriendliness,
       friendliness,
       tier,
@@ -290,14 +296,19 @@ export class MemoryStore {
       this.setFriendliness(playerId, node.characterId, nextScore);
     }
 
-    let flags = { ...progress.flags };
+    let flags: Record<string, boolean> = { ...progress.flags, hasSave: true };
     if (option.minigameId && minigameWon) {
       const played = playedMinigameId ?? option.minigameId;
-      flags = recordMinigameWinFlags(flags, {
-        playedMinigameId: played,
-        characterId: node.characterId,
-      });
-      flags[minigameFlag(option.minigameId)] = true;
+      flags = {
+        ...recordMinigameWinFlags(flags, {
+          playedMinigameId: played,
+          characterId: node.characterId,
+        }),
+        [minigameFlag(option.minigameId)]: true,
+        hasSave: true,
+      };
+    } else if (!option.minigameId) {
+      flags = { ...clearMinigameCooldown(flags), hasSave: true };
     }
 
     this.progress.set(playerId, {
@@ -354,7 +365,7 @@ export class MemoryStore {
       conversationId: node?.conversationId ?? existing.conversationId,
       endingType: node?.isEnding ? node.endingType : existing.endingType,
       bookmarks,
-      flags,
+      flags: { ...existing.flags, ...flags, hasSave: true },
       updatedAt: new Date().toISOString(),
     };
     this.progress.set(playerId, progress);

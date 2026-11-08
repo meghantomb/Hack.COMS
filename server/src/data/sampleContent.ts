@@ -1322,21 +1322,9 @@ const samOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Bread Snake. Later ids stay bread_snake; the client picks the random pool after that win. */
+/** At most one optional minigame offer per later visit (first meeting already has invite_hop). */
 export const samOptions: DialogueOption[] = attachMinigameChoices(samOptionsBase, "bread_snake", [
-  { nodeId: "pond_meet", id: "opt_mg_pond_meet", text: "I'll follow the crumbs. Don't lose me." },
-  { nodeId: "small_talk", id: "opt_mg_small_talk", text: "Let's play something." },
-  { nodeId: "xander_joins", id: "opt_mg_xander_joins", text: "I'll take the challenge." },
-  { nodeId: "xander_noticed", id: "opt_mg_xander_noticed", text: "How about a game?" },
-  { nodeId: "after_decline", id: "opt_mg_after_decline", text: "I'll play, if you will." },
   { nodeId: "c2_hello", id: "opt_mg_c2_hello", text: "Make it a game. I'm in." },
-  { nodeId: "c2_practice", id: "opt_mg_c2_practice", text: "I'll take you on." },
-  { nodeId: "c2_ryan_joins", id: "opt_mg_c2_ryan_joins", text: "A game, then. I'm ready." },
-  { nodeId: "c2_ryan_passes", id: "opt_mg_c2_ryan_passes", text: "Let's make a game of it." },
   { nodeId: "c3_arrive", id: "opt_mg_c3_arrive", text: "Let's play something." },
-  { nodeId: "c3_honest", id: "opt_mg_c3_honest", text: "I'll take the challenge." },
-  { nodeId: "c3_jeremy_spotted", id: "opt_mg_c3_jeremy_spotted", text: "How about a game?" },
-  { nodeId: "c3_after_jeremy", id: "opt_mg_c3_after_jeremy", text: "I'll play, if you will." },
-  { nodeId: "c3_ask", id: "opt_mg_c3_ask", text: "Make it a game. I'm in." },
   { nodeId: "c4_hello", id: "opt_mg_c4_hello", text: "I'll take you on." },
-  { nodeId: "c4_others", id: "opt_mg_c4_others", text: "A game, then. I'm ready." },
 ]);

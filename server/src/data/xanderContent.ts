@@ -1073,24 +1073,14 @@ const xanderOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Badboy Barrage. Later ids stay bullet_hell; the client picks the random pool after that win. */
+/** One optional offer per visit. */
 export const xanderOptions: DialogueOption[] = attachMinigameChoices(
   xanderOptionsBase,
   "bullet_hell",
   [
     { nodeId: "xander_deep_end_meet", id: "opt_mg_x_meet", text: "I'll dodge. Keep your eyes on me." },
-    { nodeId: "xander_reputation", id: "opt_mg_x_reputation", text: "Let's play something." },
-    { nodeId: "xander_detail", id: "opt_mg_x_detail", text: "I'll take the challenge." },
-    { nodeId: "xander_ryan_shows", id: "opt_mg_x_ryan", text: "How about a game?" },
-    { nodeId: "xander_after_hop", id: "opt_mg_x_after", text: "I'll play, if you will." },
-    { nodeId: "xander_closer", id: "opt_mg_x_closer", text: "Make it a game. I'm in." },
     { nodeId: "xander2_hello", id: "opt_mg_x2_hello", text: "I'll take you on." },
-    { nodeId: "xander2_pressed", id: "opt_mg_x2_pressed", text: "A game, then. I'm ready." },
-    { nodeId: "xander2_sam_shows", id: "opt_mg_x2_sam", text: "Let's make a game of it." },
-    { nodeId: "xander2_closer", id: "opt_mg_x2_closer", text: "Let's play something." },
     { nodeId: "xander3_hello", id: "opt_mg_x3_hello", text: "I'll take the challenge." },
-    { nodeId: "xander3_story", id: "opt_mg_x3_story", text: "How about a game?" },
-    { nodeId: "xander3_after_stay", id: "opt_mg_x3_stay", text: "I'll play, if you will." },
     { nodeId: "xander4_edge", id: "opt_mg_x4_edge", text: "Make it a game. I'm in." },
-    { nodeId: "xander4_fight", id: "opt_mg_x4_fight", text: "I'll take you on." },
   ]
 );

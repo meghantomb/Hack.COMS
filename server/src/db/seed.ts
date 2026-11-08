@@ -9,13 +9,7 @@ dotenv.config();
 import * as schema from "./schema";
 import { duckScripts, sampleMinigames, shoreNodes, shoreOptions } from "../data/duckScripts";
 import { sampleCharacters } from "../data/sampleContent";
-import {
-  DEFAULT_PLAYER_ID,
-  DUCK_CHARACTER_IDS,
-  SAMPLE_CHARACTER_ID,
-  START_NODE_ID,
-  bookmarkGraph,
-} from "@duck-dating/shared";
+import { bookmarkGraph } from "@duck-dating/shared";
 import { rewriteExitBookmarks } from "./rewriteExitBookmarks";
 
 async function seed() {
@@ -185,42 +179,12 @@ async function seed() {
   const optionIds = options.map((opt) => opt.id);
   const nodeIds = nodes.map((node) => node.id);
   await db.delete(schema.dialogueOptions).where(notInArray(schema.dialogueOptions.id, optionIds));
-  await db
-    .update(schema.playerProgress)
-    .set({
-      currentNodeId: START_NODE_ID,
-      conversationId: null,
-      exchangeCount: 0,
-      consecutiveConversations: 0,
-    })
-    .where(notInArray(schema.playerProgress.currentNodeId, nodeIds));
   await db.delete(schema.dialogueNodes).where(notInArray(schema.dialogueNodes.id, nodeIds));
 
-  for (const characterId of DUCK_CHARACTER_IDS) {
-    await db
-      .insert(schema.relationships)
-      .values({
-        playerId: DEFAULT_PLAYER_ID,
-        characterId,
-        friendliness: 0,
-      })
-      .onConflictDoNothing();
-  }
-
-  await db
-    .insert(schema.playerProgress)
-    .values({
-      playerId: DEFAULT_PLAYER_ID,
-      currentNodeId: START_NODE_ID,
-      characterId: SAMPLE_CHARACTER_ID,
-      conversationId: null,
-      exchangeCount: 0,
-      consecutiveConversations: 0,
-      endingType: "bad",
-      flags: {},
-      bookmarks: {},
-    })
-    .onConflictDoNothing();
+  // Wipe all player saves so devices never share a seeded "local-player" row.
+  await db.delete(schema.relationships);
+  await db.delete(schema.playerProgress);
+  console.log("Cleared all player progress and relationships.");
 
   const rewritten = await rewriteExitBookmarks(db, bookmarkGraph(nodes, options));
   console.log(

@@ -117,8 +117,12 @@ export default function App() {
 
         {phase === "dialogue" && (
           <div className="absolute inset-x-0 bottom-0 z-20 mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pb-5 pr-20 sm:gap-4 sm:px-8 sm:pb-7 sm:pr-28 lg:max-w-6xl lg:gap-5 lg:px-10 lg:pb-9 lg:pr-32 xl:max-w-7xl xl:gap-6 xl:px-12 xl:pb-11 xl:pr-36">
-            <DialogueBox speaker={bundle.node.speaker} text={bundle.node.text} />
-            <ChoiceMenu options={bundle.options} />
+            <DialogueBox
+              key={bundle.node.id}
+              speaker={bundle.node.speaker}
+              text={bundle.node.text}
+            />
+            <ChoiceMenu key={`${bundle.node.id}-choices`} options={bundle.options} />
           </div>
         )}
 

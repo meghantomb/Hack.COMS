@@ -69,6 +69,13 @@ export function minigameClearedFlag(minigameId: string) {
   return `minigame:${minigameId}`;
 }
 
+/** After a win, hide further minigame replies until the next normal choice. */
+export const MINIGAME_COOLDOWN_FLAG = "minigameCooldown";
+
+export function hasMinigameCooldown(flags: Record<string, boolean> | null | undefined) {
+  return Boolean(flags?.[MINIGAME_COOLDOWN_FLAG]);
+}
+
 export function isDuckCharacterId(
   id: string
 ): id is (typeof DUCK_CHARACTER_IDS)[number] {
@@ -112,5 +119,15 @@ export function recordMinigameWinFlags(
   }
   // Keep legacy "any minigame cleared" checks working.
   next[`minigame:${input.playedMinigameId}`] = true;
+  next[MINIGAME_COOLDOWN_FLAG] = true;
+  return next;
+}
+
+export function clearMinigameCooldown(
+  flags: Record<string, boolean>
+): Record<string, boolean> {
+  if (!flags[MINIGAME_COOLDOWN_FLAG]) return flags;
+  const next = { ...flags };
+  delete next[MINIGAME_COOLDOWN_FLAG];
   return next;
 }

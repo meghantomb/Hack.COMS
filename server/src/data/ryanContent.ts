@@ -926,16 +926,9 @@ const ryanOptionsBase: DialogueOption[] = [
 ];
 
 /** First launch is Jock Slide. Later ids stay slide_puzzle; the client picks the random pool after that win. */
+/** One optional offer per visit (authored first-meet race already launches a game). */
 export const ryanOptions: DialogueOption[] = attachMinigameChoices(ryanOptionsBase, "slide_puzzle", [
-  { nodeId: "ryan_pond_meet", id: "opt_mg_ryan_meet", text: "I'll take the slide. Get us unstuck." },
-  { nodeId: "ryan_small_talk", id: "opt_mg_ryan_talk", text: "Let's play something." },
-  { nodeId: "ryan_after_win", id: "opt_mg_ryan_after", text: "I'll take the challenge." },
-  { nodeId: "ryan_deeper", id: "opt_mg_ryan_deeper", text: "How about a game?" },
   { nodeId: "ryan_train_hello", id: "opt_mg_ryan_train_hello", text: "I'll play, if you will." },
-  { nodeId: "ryan_train_decline", id: "opt_mg_ryan_train_decline", text: "Make it a game. I'm in." },
   { nodeId: "ryan_crowd_arrive", id: "opt_mg_ryan_crowd", text: "I'll take you on." },
-  { nodeId: "ryan_crowd_xander", id: "opt_mg_ryan_crowd_x", text: "A game, then. I'm ready." },
-  { nodeId: "ryan_crowd_defended", id: "opt_mg_ryan_defended", text: "Let's make a game of it." },
-  { nodeId: "ryan_crowd_deeper", id: "opt_mg_ryan_crowd_deep", text: "Let's play something." },
   { nodeId: "ryan_final_hello", id: "opt_mg_ryan_final", text: "I'll take the challenge." },
 ]);

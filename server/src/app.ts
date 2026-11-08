@@ -6,8 +6,6 @@ import { dialogueRouter } from "./routes/dialogue";
 import { progressRouter } from "./routes/progress";
 import { generateRouter } from "./routes/generate";
 import { initDb, isUsingDatabase } from "./db";
-import { ensurePlayer } from "./services/gameService";
-
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 dotenv.config();
 
@@ -23,7 +21,7 @@ export function ensureAppReady(): Promise<void> {
   if (!ready) {
     ready = (async () => {
       await initDb();
-      await ensurePlayer();
+      // Do not seed a shared default player — each device creates its own save.
     })();
   }
   return ready;
