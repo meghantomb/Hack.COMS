@@ -2,11 +2,14 @@
 
 Vite serves this folder at `/assets/...`. Filenames must match exactly.
 
-## Backgrounds → `backgrounds/`
+## Background → `backgrounds/`
 
-- `pond.png`
-- `island.png`
-- `pond_sunset.png`
+- `pond.png` — only background (full-bleed for every scene)
+
+## Intro → `client/public/intro/` (not under `assets/`)
+
+- `bread_intro_video.mp4` — plays after **New Game**, before dialogue (Skip available)
+  Served at `/intro/bread_intro_video.mp4`
 
 ## Player (you, left side of screen) → `player/`
 

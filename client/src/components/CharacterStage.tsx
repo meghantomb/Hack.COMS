@@ -46,7 +46,7 @@ function Player({ facing }: { facing: "left" | "right" }) {
       <SpriteImage
         src={playerSrc(facing)}
         alt="You"
-        className="max-h-full w-auto max-w-full object-contain object-bottom drop-shadow-lg"
+        className="max-h-full w-auto max-w-full object-contain object-bottom"
         placeholderClassName="flex h-[70%] w-full max-w-[240px] items-end justify-center rounded-t-[40%] bg-pond-mid/40"
       />
     </div>
@@ -63,7 +63,7 @@ function DuckSprite({
       <SpriteImage
         src={duckSrc(duck.spriteKey, duck.facing)}
         alt={duck.name}
-        className="max-h-full w-auto max-w-full object-contain object-bottom drop-shadow-lg"
+        className="max-h-full w-auto max-w-full object-contain object-bottom"
         placeholderClassName="flex h-[70%] w-full max-w-[240px] items-end justify-center rounded-t-[40%] bg-pond-reed/35"
       />
     </div>
