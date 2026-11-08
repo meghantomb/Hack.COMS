@@ -78,6 +78,8 @@ export interface DialogueOption {
   /** Exact closeness required before this reply is shown. */
   minFriendliness: number;
   minigameId: string | null;
+  /** Shown only after the player has already won a minigame. */
+  requiresMinigameWin: boolean;
   /** Starts another conversation with the same duck. Hidden after three in a row. */
   continuesConversation: boolean;
   sortOrder: number;

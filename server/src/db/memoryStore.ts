@@ -6,6 +6,7 @@ import {
   advanceConversation,
   getFriendlinessTier,
   minigameFlag,
+  hasClearedMinigame,
   optionIsAvailable,
   type Character,
   type ChoiceResult,
@@ -19,12 +20,12 @@ import {
   type StagePresence,
 } from "@duck-dating/shared";
 import {
-  sampleCharacters,
   sampleConversations,
-  sampleMinigame,
+  sampleMinigames,
   sampleNodes,
   sampleOptions,
-} from "../data/sampleContent";
+} from "../data/duckScripts";
+import { sampleCharacters } from "../data/sampleContent";
 
 function clone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v)) as T;
@@ -53,7 +54,7 @@ export class MemoryStore {
   );
   nodes = new Map<string, DialogueNode>(sampleNodes.map((n) => [n.id, clone(n)]));
   options = new Map<string, DialogueOption>(sampleOptions.map((o) => [o.id, clone(o)]));
-  minigames = new Map<string, Minigame>([[sampleMinigame.id, clone(sampleMinigame)]]);
+  minigames = new Map<string, Minigame>(sampleMinigames.map((game) => [game.id, clone(game)]));
   relationships = new Map<string, number>();
   progress = new Map<string, PlayerProgress>();
 
@@ -103,6 +104,8 @@ export class MemoryStore {
           minFriendliness: o.minFriendliness,
           requiredTier: o.requiredTier,
           continuesConversation: o.continuesConversation,
+          requiresMinigameWin: o.requiresMinigameWin,
+          minigameCleared: hasClearedMinigame(progress.flags),
           nextMinFriendliness: next?.minFriendliness ?? 0,
           friendliness,
           tier,
@@ -177,6 +180,8 @@ export class MemoryStore {
       minFriendliness: option.minFriendliness,
       requiredTier: option.requiredTier,
       continuesConversation: option.continuesConversation,
+      requiresMinigameWin: option.requiresMinigameWin,
+      minigameCleared: hasClearedMinigame(progress.flags),
       nextMinFriendliness: nextNode.minFriendliness,
       friendliness,
       tier,
@@ -314,6 +319,7 @@ export class MemoryStore {
         requiredTier: null,
         minFriendliness: 0,
         minigameId: null,
+        requiresMinigameWin: false,
         continuesConversation: false,
         sortOrder: sort++,
       };

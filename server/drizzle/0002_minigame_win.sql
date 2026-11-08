@@ -1,0 +1,2 @@
+ALTER TABLE dialogue_options
+  ADD COLUMN IF NOT EXISTS requires_minigame_win BOOLEAN NOT NULL DEFAULT FALSE;

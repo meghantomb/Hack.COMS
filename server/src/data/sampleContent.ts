@@ -5,7 +5,6 @@ import type {
   DialogueOption,
   Minigame,
 } from "@duck-dating/shared";
-import { xanderConversations, xanderNodes, xanderOptions } from "./xanderContent";
 
 /**
  * Four duck slots. Art files (flat under client/public/assets/ducks/):
@@ -57,7 +56,7 @@ export const sampleMinigame: Minigame = {
 
 export const SAM_CONVERSATION_ID = "sam_first_meeting";
 
-export const sampleConversations: Conversation[] = [
+export const samConversations: Conversation[] = [
   {
     id: SAM_CONVERSATION_ID,
     characterId: "breadluvr",
@@ -65,7 +64,6 @@ export const sampleConversations: Conversation[] = [
     sortOrder: 0,
     maxExchanges: 20,
   },
-  ...xanderConversations,
 ];
 
 function line(
@@ -91,30 +89,42 @@ function line(
 }
 
 function reply(
-  option: Omit<DialogueOption, "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier"> &
-    Partial<Pick<DialogueOption, "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier">>
+  option: Omit<
+    DialogueOption,
+    "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier" | "requiresMinigameWin"
+  > &
+    Partial<
+      Pick<
+        DialogueOption,
+        "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier" | "requiresMinigameWin"
+      >
+    >
 ): DialogueOption {
   return {
     minFriendliness: 0,
     continuesConversation: false,
+    requiresMinigameWin: false,
     minigameId: null,
     requiredTier: null,
     ...option,
   };
 }
 
-export const sampleNodes: DialogueNode[] = [
+export const shoreNodes: DialogueNode[] = [
   line({
     id: "pond_shore",
     characterId: "breadluvr",
     conversationId: null,
     speaker: "Narrator",
-    text: "The hill ends at the campus pond. One duck waits in the sun, already staring like he has been hungry for you his whole life. At the far bank, another sits in the dark and pretends he has not seen you roll in.",
+    text: "The hill ends at the campus pond. One duck waits in the sun, already staring like he has been hungry for you his whole life. At the far bank, another sits in the dark and pretends he has not seen you roll in. A third is racing the reeds, grinning like the water is a track. In the shade, a fourth is already drawing, as if the page expected you.",
     backgroundKey: "pond",
     spriteExpression: "neutral",
     isEnding: false,
     guestCharacterId: "badboy",
   }),
+];
+
+export const samNodes: DialogueNode[] = [
   line({
     id: "pond_meet",
     characterId: "breadluvr",
@@ -199,10 +209,9 @@ export const sampleNodes: DialogueNode[] = [
     endingType: "good",
     minFriendliness: 60,
   }),
-  ...xanderNodes,
 ];
 
-export const sampleOptions: DialogueOption[] = [
+export const shoreOptions: DialogueOption[] = [
   reply({
     id: "opt_shore_sam",
     nodeId: "pond_shore",
@@ -219,6 +228,25 @@ export const sampleOptions: DialogueOption[] = [
     friendlinessDelta: 0,
     sortOrder: 1,
   }),
+  reply({
+    id: "opt_shore_ryan",
+    nodeId: "pond_shore",
+    text: "Roll toward the duck racing the reeds.",
+    nextNodeId: "ryan_pond_meet",
+    friendlinessDelta: 0,
+    sortOrder: 2,
+  }),
+  reply({
+    id: "opt_shore_jeremy",
+    nodeId: "pond_shore",
+    text: "Roll toward the duck drawing in the shade.",
+    nextNodeId: "jeremy_pond_meet",
+    friendlinessDelta: 0,
+    sortOrder: 3,
+  }),
+];
+
+export const samOptions: DialogueOption[] = [
   reply({
     id: "opt_approach",
     nodeId: "pond_meet",
@@ -354,5 +382,4 @@ export const sampleOptions: DialogueOption[] = [
     minFriendliness: 40,
     sortOrder: 2,
   }),
-  ...xanderOptions,
 ];

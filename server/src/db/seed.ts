@@ -1,18 +1,13 @@
 import dotenv from "dotenv";
 import { resolve } from "path";
-import { getDb, isUsingDatabase, closeDb } from "./index";
+import { closeDb, getDb, initDb } from "./index";
 
 dotenv.config({ path: resolve(__dirname, "../../../.env") });
 dotenv.config();
 
 import * as schema from "./schema";
-import {
-  sampleCharacters,
-  sampleConversations,
-  sampleMinigame,
-  sampleNodes,
-  sampleOptions,
-} from "../data/sampleContent";
+import { duckScripts, sampleMinigames, shoreNodes, shoreOptions } from "../data/duckScripts";
+import { sampleCharacters } from "../data/sampleContent";
 import {
   DEFAULT_PLAYER_ID,
   DUCK_CHARACTER_IDS,
@@ -21,7 +16,8 @@ import {
 } from "@duck-dating/shared";
 
 async function seed() {
-  if (!isUsingDatabase()) {
+  const mode = await initDb();
+  if (mode !== "postgres") {
     console.log("No DATABASE_URL — seed not needed (memory store has sample data).");
     process.exit(0);
   }
@@ -49,38 +45,55 @@ async function seed() {
       });
   }
 
-  for (const conversation of sampleConversations) {
-    await db
-      .insert(schema.conversations)
-      .values({
-        id: conversation.id,
-        characterId: conversation.characterId,
-        title: conversation.title,
-        sortOrder: conversation.sortOrder,
-        maxExchanges: conversation.maxExchanges,
-      })
-      .onConflictDoUpdate({
-        target: schema.conversations.id,
-        set: {
+  for (const script of duckScripts) {
+    for (const conversation of script.conversations) {
+      await db
+        .insert(schema.conversations)
+        .values({
+          id: conversation.id,
           characterId: conversation.characterId,
           title: conversation.title,
           sortOrder: conversation.sortOrder,
           maxExchanges: conversation.maxExchanges,
+        })
+        .onConflictDoUpdate({
+          target: schema.conversations.id,
+          set: {
+            characterId: conversation.characterId,
+            title: conversation.title,
+            sortOrder: conversation.sortOrder,
+            maxExchanges: conversation.maxExchanges,
+          },
+        });
+    }
+    console.log(
+      script.conversations.length === 0
+        ? `${script.id}: no dialogue yet`
+        : `${script.id}: ${script.conversations.length} conversations`
+    );
+  }
+
+  for (const minigame of sampleMinigames) {
+    await db
+      .insert(schema.minigames)
+      .values({
+        id: minigame.id,
+        name: minigame.name,
+        description: minigame.description,
+        phaserKey: minigame.phaserKey,
+      })
+      .onConflictDoUpdate({
+        target: schema.minigames.id,
+        set: {
+          name: minigame.name,
+          description: minigame.description,
+          phaserKey: minigame.phaserKey,
         },
       });
   }
 
-  await db
-    .insert(schema.minigames)
-    .values({
-      id: sampleMinigame.id,
-      name: sampleMinigame.name,
-      description: sampleMinigame.description,
-      phaserKey: sampleMinigame.phaserKey,
-    })
-    .onConflictDoNothing();
-
-  for (const node of sampleNodes) {
+  const nodes = [...shoreNodes, ...duckScripts.flatMap((script) => script.nodes)];
+  for (const node of nodes) {
     await db
       .insert(schema.dialogueNodes)
       .values({
@@ -115,7 +128,8 @@ async function seed() {
       });
   }
 
-  for (const opt of sampleOptions) {
+  const options = [...shoreOptions, ...duckScripts.flatMap((script) => script.options)];
+  for (const opt of options) {
     await db
       .insert(schema.dialogueOptions)
       .values({
@@ -127,6 +141,7 @@ async function seed() {
         requiredTier: opt.requiredTier,
         minFriendliness: opt.minFriendliness,
         minigameId: opt.minigameId,
+        requiresMinigameWin: opt.requiresMinigameWin,
         continuesConversation: opt.continuesConversation,
         sortOrder: opt.sortOrder,
         isAiGenerated: false,
@@ -141,6 +156,7 @@ async function seed() {
           requiredTier: opt.requiredTier,
           minFriendliness: opt.minFriendliness,
           minigameId: opt.minigameId,
+          requiresMinigameWin: opt.requiresMinigameWin,
           continuesConversation: opt.continuesConversation,
           sortOrder: opt.sortOrder,
         },
@@ -164,7 +180,7 @@ async function seed() {
       playerId: DEFAULT_PLAYER_ID,
       currentNodeId: START_NODE_ID,
       characterId: SAMPLE_CHARACTER_ID,
-      conversationId: "sam_first_meeting",
+      conversationId: null,
       exchangeCount: 0,
       consecutiveConversations: 0,
       endingType: "bad",
@@ -172,7 +188,9 @@ async function seed() {
     })
     .onConflictDoNothing();
 
-  console.log("Seed complete (4 duck slots).");
+  console.log(
+    `Seed complete (${nodes.length} lines, ${options.length} replies, shore included).`
+  );
   await closeDb();
 }
 

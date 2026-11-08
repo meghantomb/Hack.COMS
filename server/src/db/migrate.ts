@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS dialogue_options (
   required_tier TEXT,
   min_friendliness INTEGER NOT NULL DEFAULT 0,
   minigame_id TEXT,
+  requires_minigame_win BOOLEAN NOT NULL DEFAULT FALSE,
   continues_conversation BOOLEAN NOT NULL DEFAULT FALSE,
   sort_order INTEGER NOT NULL DEFAULT 0,
   is_ai_generated BOOLEAN NOT NULL DEFAULT FALSE

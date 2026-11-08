@@ -61,15 +61,19 @@ function line(
 function reply(
   option: Omit<
     DialogueOption,
-    "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier"
+    "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier" | "requiresMinigameWin"
   > &
     Partial<
-      Pick<DialogueOption, "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier">
+      Pick<
+        DialogueOption,
+        "minFriendliness" | "continuesConversation" | "minigameId" | "requiredTier" | "requiresMinigameWin"
+      >
     >
 ): DialogueOption {
   return {
     minFriendliness: 0,
     continuesConversation: false,
+    requiresMinigameWin: false,
     minigameId: null,
     requiredTier: null,
     ...option,

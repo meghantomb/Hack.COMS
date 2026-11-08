@@ -20,11 +20,19 @@ export function minigameFlag(minigameId: string) {
   return `minigame:${minigameId}`;
 }
 
+/** True once any minigame win has been stored on the save. */
+export function hasClearedMinigame(flags: Record<string, boolean> | null | undefined) {
+  if (!flags) return false;
+  return Object.entries(flags).some(([key, on]) => on && key.startsWith("minigame:"));
+}
+
 /** Whether this reply may be shown for the current closeness and conversation. */
 export function optionIsAvailable(input: {
   minFriendliness: number;
   requiredTier: FriendlinessTier | null;
   continuesConversation: boolean;
+  requiresMinigameWin: boolean;
+  minigameCleared: boolean;
   nextMinFriendliness: number;
   friendliness: number;
   tier: FriendlinessTier;
@@ -36,6 +44,7 @@ export function optionIsAvailable(input: {
   if (input.friendliness < input.minFriendliness) return false;
   if (input.friendliness < input.nextMinFriendliness) return false;
   if (!meetsTier(input.tier, input.requiredTier)) return false;
+  if (input.requiresMinigameWin && !input.minigameCleared) return false;
   if (
     input.continuesConversation &&
     input.consecutiveConversations >= MAX_CONSECUTIVE_CONVERSATIONS

@@ -58,6 +58,7 @@ export const dialogueOptions = pgTable("dialogue_options", {
   requiredTier: text("required_tier"),
   minFriendliness: integer("min_friendliness").notNull().default(0),
   minigameId: text("minigame_id"),
+  requiresMinigameWin: boolean("requires_minigame_win").notNull().default(false),
   continuesConversation: boolean("continues_conversation").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   isAiGenerated: boolean("is_ai_generated").notNull().default(false),
